@@ -1,0 +1,198 @@
+<!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/index"> <img src="../static/images/srrlogo.png" width="36" height="36" border="0" /> </a>
+            </div>
+            <!-- Top Menu Items -->
+            <ul class="nav navbar-right top-nav">
+                
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> <% if (user.local.name != null) { %> <%= user.local.name %> <% } %><b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="/profile"><i class="fa fa-fw fa-user"></i>profile</a>
+                        </li>
+                        <li>
+                            <a href="/setup"><i class="fa fa-fw fa-gear"></i>user setting</a>
+                        </li>
+                         
+                        <li class="divider"></li>
+                        <li>
+                            <a href="/logout"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav side-nav">
+                    <li class="active">
+                        <a href="/index"><i class="fa fa-fw fa-dashboard"></i>HOME</a>
+                    </li>
+		            <li>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#demo">
+			            <i class="fa fa-fw fa-edit"></i> Operation <i class="fa fa-fw fa-caret-down"></i>
+			            </a>
+                        <ul id="demo" class="collapse">
+                        <%if (user.local.role ==1) { %>
+                        <li>
+                                <a href="/register"><i class="fa fa-list-alt"></i>ลงทะเบียน</a>
+                        </li>
+                        <li>
+                                <a href="/customerlist"><i class="fa fa-list-alt"></i>รายการลูกค้า</a>
+                        </li>         
+                        <li>
+                                <a href="/claimlist"><i class="fa fa-list-alt"></i>รายการเคลมสินค้า</a>
+                        </li>    
+                        <%} %>
+                        <%if (user.local.role ==2) { %>
+                        <li>
+                                <a href="/claimlistwh"><i class="fa fa-list-alt"></i>รับสินค้าเคลม</a>
+                        </li>   
+                        <%} %>
+                        <%if (user.local.role ==3) { %>
+                        <li>
+                                <a href="/claimlistwh"><i class="fa fa-list-alt"></i>รับสินค้าเคลม</a>
+                        </li>   
+                        <%} %>
+                         <%if (user.local.role ==4) { %>
+
+                        <%} %>
+                         <%if (user.local.role ==5) { %>
+                        <li>
+                                <a href="/register"><i class="fa fa-list-alt"></i>ลงทะเบียน</a>
+                        </li>
+                        <li>
+                                <a href="/customerlist"><i class="fa fa-list-alt"></i>รายการลูกค้า</a>
+                        </li>         
+                        <li>
+                                <a href="/claimlist"><i class="fa fa-list-alt"></i>รายการเคลมสินค้า</a>
+                        </li>    
+                        <li>
+                                <a href="/claimlistwh"><i class="fa fa-list-alt"></i>รับสินค้าเคลม</a>
+                        </li> 
+                        <%} %>
+                         <%if (user.local.role ==6) { %>
+                        <li>
+                                <a href="/register"><i class="fa fa-list-alt"></i>ลงทะเบียน</a>
+                        </li>
+                        <li>
+                                <a href="/customerlist"><i class="fa fa-list-alt"></i>รายการลูกค้า</a>
+                        </li>         
+                        <li>
+                                <a href="/claimlist"><i class="fa fa-list-alt"></i>รายการเคลมสินค้า</a>
+                        </li>    
+                        <li>
+                                <a href="/claimlistwh"><i class="fa fa-list-alt"></i>รับสินค้าเคลม</a>
+                        </li> 
+                        <%} %>
+                         
+                        </ul>
+                    </li>
+ 
+                    <li>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#setting">
+			            <i class="fa fa-cog"></i> Setting <i class="fa fa-fw fa-caret-down"></i>
+			            </a>
+                        <ul id="setting" class="collapse">
+                        <%if (user.local.role ==1) { %>
+
+                        <%} %>
+                        <%if (user.local.role ==2) { %>
+
+                        <%} %>
+                        <%if (user.local.role ==3) { %>
+
+                        <%} %>
+                         <%if (user.local.role ==4) { %>
+
+                        <%} %>
+                         <%if (user.local.role ==5) { %>
+                            <li>
+                                <a href="/master"><i class="fa fa-list-alt"></i> ตั้งค่ามาสเตอร์</a>
+                            </li>
+                            <li>
+                                <a href="/carbrand"><i class="fa fa-tag"></i>ตั้งค่ายี่ห้อรถ</a>
+                            </li>
+                             <li>
+                                <a href="/product"><i class="fa fa-tag"></i>ตั้งค่ารับประกันสินค้า</a>
+                            </li>
+                        <%} %>
+                         <%if (user.local.role ==6) { %>
+                            <li>
+                                <a href="/master"><i class="fa fa-list-alt"></i> ตั้งค่ามาสเตอร์</a>
+                            </li>
+                            <li>
+                                <a href="/carbrand"><i class="fa fa-tag"></i>ตั้งค่ายี่ห้อรถ</a>
+                            </li>
+                             <li>
+                                <a href="/product"><i class="fa fa-tag"></i>ตั้งค่ารับประกันสินค้า</a>
+                            </li>
+                        <%} %>
+                             
+
+                        </ul>
+                    </li>
+                   
+
+                   <li>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#report">
+			            <i class="fa fa-cog"></i> Report <i class="fa fa-fw fa-caret-down"></i>
+			            </a>
+                        <ul id="report" class="collapse">
+                        <%if (user.local.role ==1) { %>
+                        <li>
+                               <a href="/reportbranch"><i class="fa fa-list-alt"></i> รายงานการเคลมสินค้า</a>
+                               <a href="/reportwaranty"><i class="fa fa-list-alt"></i> รายงานการรับประกันสินค้า</a>
+                            </li>
+                        <%} %>
+                        <%if (user.local.role ==2) { %>
+                        <li>
+                                <a href="/reportbranch"><i class="fa fa-list-alt"></i> รายงานการเคลมสินค้า</a>
+                                <a href="/reportwaranty"><i class="fa fa-list-alt"></i> รายงานการรับประกันสินค้า</a>
+                            </li>
+                        <%} %>
+                        <%if (user.local.role ==3) { %>
+                        <li>
+                                <a href="/reportbranch"><i class="fa fa-list-alt"></i> รายงานการเคลมสินค้า</a>
+                                <a href="/reportwaranty"><i class="fa fa-list-alt"></i> รายงานการรับประกันสินค้า</a>
+                            </li>
+                        <%} %>
+                         <%if (user.local.role ==4) { %>
+                            <li>
+                                <a href="/reportbranch"><i class="fa fa-list-alt"></i> รายงานการเคลมสินค้า</a>
+                                <a href="/reportwaranty"><i class="fa fa-list-alt"></i> รายงานการรับประกันสินค้า</a>
+                            </li>
+                        <%} %>
+                         <%if (user.local.role ==5) { %>
+                            <li>
+                                 <a href="/reportbranch"><i class="fa fa-list-alt"></i> รายงานการเคลมสินค้า</a>
+                                 <a href="/reportwaranty"><i class="fa fa-list-alt"></i> รายงานการรับประกันสินค้า</a>
+                            </li>
+                            
+                        <%} %>
+                         <%if (user.local.role ==6) { %>
+                            <li>
+                               <a href="/reportbranch"><i class="fa fa-list-alt"></i> รายงานการเคลมสินค้า</a>
+                               <a href="/reportwaranty"><i class="fa fa-list-alt"></i> รายงานการรับประกันสินค้า</a>
+                            </li>
+                           
+                        <%} %>
+                             
+
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
+
+        

@@ -1,0 +1,139 @@
+<% include partials/head %> 
+<script>
+Date.prototype.addDays = function(days) {
+    this.setDate(this.getDate() + parseInt(days));
+    return this;
+};
+$(document).ready(function () {
+      $("#btn_submit").click(function(){
+        var str='';
+        if(str != ''){
+            alert('โปรดตรวจสอบข้อมูล '+str + 'ให้ครบถ้วน');
+            return false;
+        }
+    });
+});
+
+
+</script>
+<style>
+    </style>
+</head>
+<body>
+ 
+ <div id="wrapper">
+ <% include partials/nav %>
+  <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+
+
+<div class="row">
+<div class="col-md-12">
+<form role="form" enctype="multipart/form-data" action="/register" method="post">
+    <div class="row setup-content" id="step-1">
+        <div class="col-xs-12">
+            <div class="col-md-12 center">
+                <h3>ข้อมูลลูกค้า</h3>
+                <div class="form-group  col-lg-3">
+                    <label class="control-label">ชื่อ<font color="red">**</font></label>
+                    <input type="text" required="required" class="form-control" placeholder="ชื่อ" name="name" id="name"  />
+                </div>
+                <div class="form-group  col-lg-3">
+                    <label class="control-label">นามสกุล</label>
+                    <input type="text" class="form-control" placeholder="นามสกุล" name="lastname" id="lastname" />
+                </div>
+		        <div class="form-group  col-lg-3">
+                    <label class="control-label">โทรศัพท์<font color="red">**</font></label>
+                    <input type="text" required="required" class="form-control" placeholder="หมายเลขโทรศัพท์" name="mobile" id="mobile" />
+                </div>
+                <div class="form-group  col-lg-3">
+                    <label class="control-label">ไลน์ไอดี</label>
+                    <input type="text" class="form-control" placeholder="Line ID" name="lineID" id="lineID" />
+                    <input type="file" name="file">
+                </div>
+                 <div class="form-group  col-lg-3">
+                    <label class="control-label">เฟสบุค</label>
+                    <input type="text" class="form-control" placeholder="Facebook" name="facebook" id="facebook" />
+                </div>
+                <div class="form-group  col-lg-3">
+                    <label class="control-label">อีเมล</label>
+                    <input type="text" class="form-control" placeholder="อีเมล" name="email" id="email" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row setup-content" id="step-2">
+        <div class="col-xs-12">
+            <div class="col-md-12 center">
+                <h3>ข้อมูลรถยนต์</h3>
+                <div class="form-group" ><select class="form-control" id="ddl_adstype" name="ddl_car">
+						<option value="">-- โปรดเลือกรถที่เข้ารับบริการ --</option>
+						<% if (cars!=null) { for(var i=0; i<cars.length; i++) {%>
+                        <option value="<%=cars[i]._id%>"><%=cars[i].display%></option>
+                        <% }} %>
+                        </select>
+                </div>
+                <div class="form-group  col-lg-3">
+                    <label class="control-label">ยี่ห้อรถ</label>
+                    	<select class="form-control" id="ddl_carbrand" name="ddl_carbrand">
+						 <option value="">--เลือกยี่ห้อ--</option>
+                        <% if (brands!=null) { for(var i=0; i<brands.length; i++) {%>
+                        <option value="<%=brands[i].brand%>"><%=brands[i].brand%></option>
+                        <% }} %>
+                        </select>
+                </div>
+                 <div class="form-group  col-lg-3">
+                    <label class="control-label">รุ่นรถ</label>
+                     <input type="text" class="form-control" placeholder="รุ่นรถ" name="txt_carseries" id="txt_carseries"  />
+                </div>
+                <div class="form-group  col-lg-3">
+                    <label class="control-label">ทะเบียนรถ</label>
+                   <input type="text" class="form-control" placeholder="ทะเบียนรถ" name="txt_licenseNo" id="txt_licenseNo"  />
+                  
+                </div>
+                 <div class="form-group  col-lg-3">
+                    <label class="control-label">เลขไมล์</label>
+                   <input type="text" class="form-control" placeholder="ทะเบียนรถ" name="txt_mileage" id="txt_mileage"  />
+                </div>
+
+                <div class="form-group  col-lg-3">
+                    <label class="control-label">PCD</label>
+                    <select class="form-control" id="ddl_pcd" name="ddl_pcd">
+                    <option value="">--เลือก PCD--</option>
+                   
+                    </select>   
+                </div>
+                 <div class="form-group  col-lg-3">
+                    <label class="control-label">Offset</label>
+                     <select class="form-control" id="ddl_offset" name="ddl_offset">
+                    <option value="">--เลือก Offset--</option>
+                   
+                    </select>
+                </div>
+                <div class="form-group  col-lg-3">
+                    <label class="control-label">ขนาดล้อ</label>
+                    <select class="form-control" id="ddl_wheelsize" name="ddl_wheelsize">
+                    <option value="">--เลือก ขนาดล้อ--</option>
+                   
+                    </select>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</form>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+<% include partials/script %>  
+  </body>
+</html>  
+

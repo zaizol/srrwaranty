@@ -1,0 +1,46 @@
+<% include partials/headlogin %>
+
+  <body>
+  <div class="container" >
+    <div class="col-lg-12 col-centered">
+
+      
+
+
+
+	<form  action="/login" method="post">     
+	  
+		<div class="row  row-centered">
+			<div class="form-group  col-lg-3 col-centered ">
+				<img src="../static/images/srrlogo.png" width="280" height="280" border="0">
+			</div>
+		</div>
+		<div class="row  row-centered">
+			<div class="form-group  col-lg-3 col-centered ">
+				<h2 class="form-signin-heading">Login</h2>
+				<% if (message != null) { %><div class="alert-danger"><%= message %></div> <% } %>
+				<input type="text" class="form-control" name="username" id="username" placeholder="ผู้ใช้งาน" required="" autofocus="" / >
+			</div>
+		</div>
+
+		<div class="row  row-centered">
+			<div class="form-group  col-lg-3 col-centered ">
+				<input type="password" class="form-control" name="password" id="password" placeholder="รหัสผ่าน" required=""/>    
+			</div>
+		</div>
+
+		<div class="row  row-centered">
+			<div class="form-group  col-lg-3 col-centered ">
+				<input class="btn btn-lg btn-primary btn-block" id="btn_login" type="submit" value="Login">  
+			</div>
+		</div>
+	</form>
+
+
+     </div>
+   </div>
+
+
+  
+  </body>
+</html>

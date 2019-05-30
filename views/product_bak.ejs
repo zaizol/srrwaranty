@@ -1,0 +1,185 @@
+<% include partials/head %> 
+<script>
+$(document).ready(function () {
+Bindtype();
+Binddata();
+
+$('#ddl_type').on('change', function() {
+    Binddata();
+});
+$('#btn_search').on('click', function() {
+    Binddata();
+});
+
+/*$('.prd').hover(function() {
+    alert('a');
+}, function() {
+
+});*/
+
+
+	
+   function Bindtype(){
+
+        $.ajax({
+            url:  'product/gettype',
+            type: 'GET',
+            dataType: 'JSON',
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var ddl=$('#ddl_type');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกประเภทสินค้า--</option>");
+                     var str_selected='';
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i]==$('#hd_type').val()){
+                            str_selected="selected";
+                        }
+                     ddl.append("<option value='"+data[i]+"' "+str_selected+" >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+    }
+
+    function Binddata(){
+
+        $.ajax({
+            url:  'product/getproduct',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_type').val(),txt_name:$('#txt_name').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproduct tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].type+"</td>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>"+data[i].warantyday+' วัน '+data[i].warantymonth+' เดือน '+data[i].warantyyear+' ปี'+" /("+data[i].warantyconditions+")</td>\
+                                 <td><a href=/createproduct/"+data[i]._id+" >แก้ไข</a> &nbsp; <a href=/product/delete/"+data[i]._id+" >ลบ</a>\
+                                 <input type='hidden' name='hd_id' id='hd_id' value='"+data[i]._id+"' />\
+                                 <input type='hidden' name='hd_productcode' id='hd_productcode' value='"+data[i].productcode+"' />\
+                                 <input type='hidden' name='hd_name' id='hd_name' value='"+data[i].name+"' />\
+                                 <input type='hidden' name='hd_tirebrand' id='hd_tirebrand' value='"+data[i].tirebrand+"' />\
+                                 <input type='hidden' name='hd_tireseries' id='hd_tireseries' value='"+data[i].tireseries+"' />\
+                                 <input type='hidden' name='hd_tiresize' id='hd_tiresize' value='"+data[i].tiresize+"' />\
+                                 <input type='hidden' name='hd_wheelbrand' id='hd_wheelbrand' value='"+data[i]._wheelbrand+"' />\
+                                 <input type='hidden' name='hd_wheelseries' id='hd_wheelseries' value='"+data[i].wheelseries+"' />\
+                                 <input type='hidden' name='hd_PCD' id='hd_PCD' value='"+data[i].PCD+"' />\
+                                 <input type='hidden' name='hd_Offset' id='hd_Offset' value='"+data[i].Offset+"' />\
+                                 <input type='hidden' name='hd_wheelsize' id='hd_wheelsize' value='"+data[i].wheelsize+"' />\
+                                 <input type='hidden' name='hd_remark' id='hd_remark' value='"+data[i].remark+"' />\
+                                 <input type='hidden' name='hd_warantyday' id='hd_warantyday' value='"+data[i].warantyday+"' />\
+                                 <input type='hidden' name='hd_warantymonth' id='hd_warantymonth' value='"+data[i].warantymonth+"' />\
+                                 <input type='hidden' name='hd_warantyyear' id='hd_warantyyear' value='"+data[i].warantyyear+"' />\
+                                 <input type='hidden' name='hd_warantyconditions' id='hd_warantyconditions' value='"+data[i].warantyconditions+"' />\
+                                 </td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+    }
+    function addproduct(){
+        alert($('#txt_type').val());
+        $.ajax({
+            url:  'product/addproduct',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ type:$('#txt_type').val(),name:$('#txt_name').val(),remark:$('#txt_remark').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert('added');
+                //set HD
+                $('#hd_type').val($('#txt_type').val());
+                //And Bind type
+            }
+        }
+        );
+    }
+});
+</script>
+</head>
+<body>
+
+ <div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">เพิ่มการรับประกันสินค้า
+
+			
+                        </h1> 
+
+                    </div>
+ <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->
+
+<div class="row">
+ <div class="col-md-12">      
+<a href="/createproduct">+เพิ่มข้อมูล</a>
+</div>
+</div>
+ <div class="row">
+                    <div class="col-md-6">        
+                    <select class="form-control" id="ddl_type" name="ddl_type">
+                    <option value="">--เลือกประเภทสินค้า--</option>
+                    </select>
+                    </div>
+                    <div class="col-md-6">        
+                    <label class="control-label">ชื่อสินค้า</label>
+<input type="text" id="txt_name" name="txt_name" value="" />
+                    </select>
+                    <input type="button" id="btn_search" name="btn_search" value="ค้นหา"/>
+                    </div>
+ </div>
+
+ <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-hover table-striped" id="tblproduct">
+                        <thead>
+                        <tr>
+                        <td>ประเภทสินค้า</td>
+                        <td>ชื่อสินค้า</td>
+                        <td>รายละเอียดสินค้า</td>
+                        <td>ระยะเวลารับประกัน</td>
+                        </tr>
+                        </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+
+			 
+
+ </div>
+			</div>
+	         </div>
+            </div>
+            <!-- /.container-fluid -->
+
+
+	   
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+<% include partials/script %>  
+  </body>
+</html>  

@@ -1,0 +1,182 @@
+<% include partials/head %> 
+<script>
+$(document).ready(function () {
+  
+$('#div_row').hide();
+$('#div_row2').hide();
+$('#btn_add').hide();
+
+
+ShowProductfield();
+
+
+
+$('#ddl_producttype').on('change', function() {
+    ShowProductfield();
+    cleardata();
+});
+
+function cleardata()
+{
+if ($('#ddl_producttype').val()=='wheel')
+    {
+        $('#ddl_brand').val('');
+        $('#ddl_series').val('');
+        $('#ddl_size').val('');
+    }else if ($('#ddl_producttype').val()=='tire')
+    {
+       $('#ddl_brand').val('');
+        $('#ddl_series').val('');
+        $('#ddl_size').val('');
+    } else if ($('#ddl_producttype').val()=='Accessories')
+    {
+       $('#ddl_brand').val('');
+        $('#ddl_series').val('');
+        $('#ddl_size').val('');
+    } else{
+       $('#ddl_brand').val('');
+        $('#ddl_series').val('');
+        $('#ddl_size').val('');
+
+        
+    }
+
+}
+function ShowProductfield()
+{
+    $('#btn_add').show();
+    $('#div_row').show();
+    $('#div_row2').show();
+
+}
+
+});
+</script>
+</head>
+<body>
+
+ <div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">เพิ่มการรับประกันสินค้า
+
+			
+                        </h1> 
+
+                    </div>
+ <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->
+<form  acton="/createproduct<%= product ? "/"+product._id : "" %>" method="post">
+<div class="row">
+<div class="form-group col-lg-3">
+<label class="control-label">ประเภทสินค้า</label>
+  <select class="form-control" id="ddl_producttype" name="ddl_producttype">
+                        <option value="">--เลือกประเภทสินค้า--</option>
+                        <% for(var i=0; i<producttype.length; i++) { %>
+                        <option value="<%=producttype[i].value%>" <%= product ?  (product.type==producttype[i].value) ? "selected" : "" :"" %> ><%=producttype[i].value%></option>
+                        <% } %>
+</select>
+</div>
+<div class="form-group col-lg-3">
+<label class="control-label">รหัสสินค้า</label>
+<input type="text" class="form-control" id="txt_productcode" name="txt_productcode" value="<%= product ?  product.productcode ? product.productcode : "" :"" %>" />
+</div>
+
+<div class="form-group col-lg-6">
+<label class="control-label">ชื่อสินค้า</label>
+<input type="text" class="form-control" id="txt_name" name="txt_name" value="<%= product ?  product.name ? product.name : "" :"" %>" />
+</div>
+</div>
+
+<div class="row" id="div_row">
+<div class="form-group col-lg-6">
+<label class="control-label">ยี่ห้อ</label>
+<input type="text" class="form-control" id="txt_brand" name="txt_brand" value="<%= product ?  product.brand ? product.brand : "" :"" %>" />
+
+</div>
+<div class="form-group col-lg-6">
+<label class="control-label">รุ่นสินค้า</label>
+<input type="text" class="form-control" id="txt_series" name="txt_series" value="<%= product ?  product.series ? product.series : "" :"" %>" />
+</div>
+</div>
+
+<div class="row" id="div_row2">
+<div class="form-group col-lg-6">
+<label class="control-label">ขนาด</label>
+<input type="text" class="form-control" id="txt_size" name="txt_size" value="<%= product ?  product.size ? product.size : "" :"" %>" />
+</div>
+<div class="form-group col-lg-6">
+
+</div>
+</div>
+
+
+<div class="row">
+<div class="form-group col-lg-6">
+<label class="control-label">รายละเอียด</label>
+<input type="text" class="form-control" id="txt_remark" name="txt_remark" value="<%= product ?  product.remark ? product.remark : "" :"" %>" />
+</div>
+<div class="form-group col-lg-6">
+<label class="control-label">ลำดับ</label>
+<input type="text" class="form-control" id="txt_orders" name="txt_orders" value="<%= product ?  product.orders ? product.orders : "" :"" %>" />
+</div>
+</div>
+
+<div class="row">
+<div class="form-group col-lg-6">
+<div class="form-group col-lg-12">
+    <div class="form-group col-lg-4 ">
+    <label class="control-label">จำนวนวัน</label>
+    <input type="text" class="form-control" id="txt_warantyday" name="txt_warantyday" value="<%= product ?  product.warantyday ? product.warantyday : "0" :"0" %>" />
+    </div>
+    <div class="form-group col-lg-4">
+    <label class="control-label">จำนวนเดือน</label>
+    <input type="text" class="form-control" id="txt_warantymonth" name="txt_warantymonth" value="<%= product ?  product.warantymonth ? product.warantymonth : "0" :"0" %>" />
+    </div>
+    <div class="form-group col-lg-4">
+    <label class="control-label">จำนวนปี</label>
+    <input type="text" class="form-control" id="txt_warantyyear" name="txt_warantyyear" value="<%= product ?  product.warantyyear ? product.warantyyear : "0" :"0" %>" />
+    </div>
+</div>
+</div>
+<div class="form-group col-lg-6">
+<label class="control-label">เงื่อนไขการรับประกัน(พิเศษ)</label>
+<input type="text" class="form-control" id="txt_warantycondition" name="txt_warantycondition" value="<%= product ?  product.warantycondition ? product.warantycondition : "" :"" %>" />
+
+</div>
+</div>
+<div class="row">
+<div class="form-group col-lg-12">
+<input type="hidden" name="hd_type" id="hd_type"/> 
+ <button class="btn btn-success btn-lg" id="btn_add" type="submit">เพิ่มข้อมูล</button>
+</div>
+
+</div>
+</form>
+
+
+			</div>
+	     </div>
+     </div>
+            <!-- /.container-fluid -->
+
+
+	   
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+<% include partials/script %>  
+  </body>
+</html>  

@@ -1,0 +1,226 @@
+<% include partials/head %> 
+<script>
+Date.prototype.addDays = function(days) {
+    this.setDate(this.getDate() + parseInt(days));
+    return this;
+};
+$(document).ready(function () {
+
+    $("#div_customer").hide();
+    $("#div_service").hide();
+    $("#checkresult").html('');
+ $("#btn_search").click(function(){
+     $("#div_customer").hide();
+     $("#div_service").hide();
+      getcustomer();
+    });
+});
+function getcustomer()
+{
+    $.ajax({
+            url:  '../checkwaranty/getcustomer',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ searchtext:$("#txt_search").val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                var idata=jQuery.parseJSON(JSON.stringify(data));
+                if (idata.length==0){
+                    $("#checkresult").html('ไม่พบข้อมูล กรุณาค้นหาใหม่อีกครั้ง');
+                }else{
+                    $("#name").html(idata[0].fullname);
+                    $("#mobile").html(idata[0].mobile);
+                    getcar(idata[0].id);
+                    $("#div_customer").show();
+                    $("#checkresult").html('');
+                }
+                     
+                }
+            }
+        );
+}
+function getcar(cus_id)
+{
+    $.ajax({
+            url:  '../checkwaranty/getcar',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ cus_id:cus_id }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+               var idata=jQuery.parseJSON(JSON.stringify(data));
+               var dnow=new Date;
+                if (idata.length==0){
+
+                }else{
+                    $("#div_service").show();
+                    var tbl=$('#tbl_service tbody');
+                     tbl.empty();
+                     var car='';
+                     var status='';
+                     for (var i = 0; i < idata.length; i++) {
+
+
+                        if (car==''){
+                            car=idata[i].cardetail;
+                                tbl.append("<tr>\
+                                <td style='background-color:#fcfcfc' colspan='6'>"+idata[i].cardetail+' '+idata[i].licenseNo+"</td>\
+                                 </tr>");
+                                 tbl.append("<tr>\
+                                 <td style='background-color:#fffac9' class='text-center'>วันที่</td>\
+                                 <td style='background-color:#fffac9' class='text-center'>สาขา</td>\
+                                 <td style='background-color:#fffac9' class='text-center'>สินค้า</td>\
+                                 <td style='background-color:#fffac9' class='text-center'>จำนวน</td>\
+                                 <td style='background-color:#fffac9' class='text-center'>วันหมดการรับประกัน</td>\
+                                 <td style='background-color:#fffac9' class='text-center'>สถานะ</td>\
+                                 </tr>");
+                        }else if (car != idata[i].cardetail){
+                             car=idata[i].cardetail;
+                             tbl.append("<tr>\
+                                 <td style='background-color:#fcfcfc' colspan='6'>"+idata[i].cardetail+' '+idata[i].licenseNo+"</td>\
+                                 </tr>");
+                                 tbl.append("<tr>\
+                                 <td style='background-color:#fffac9' class='text-center'>วันที่</td>\
+                                 <td style='background-color:#fffac9' class='text-center'>สาขา</td>\
+                                 <td style='background-color:#fffac9' class='text-center'>สินค้า</td>\
+                                 <td style='background-color:#fffac9' class='text-center'>จำนวน</td>\
+                                 <td style='background-color:#fffac9' class='text-center'>วันหมดการรับประกัน</td>\
+                                 <td style='background-color:#fffac9' class='text-center'>สถานะ</td>\
+                                 </tr>");
+                        }
+
+                        if (idata[i].status== '')
+                        {
+                            //check in waranty
+                            if (moment(idata[i].eow)>=moment(dnow))
+                            {
+                                status="<span class='label label-default'>อยู่ระหว่างรับประกัน</span>";
+                            }else{
+                                status="<span class='label label-default'>หมดอายุรับประกัน</span>";
+                            }
+
+                        }else{
+                             if (idata[i].status=='OFFICER_SENDNEW'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-danger'>เจ้าหน้าที่รับสินค้าเคลม</span></a>";
+     }else if(idata[i].status=='WAREHOUSE_RECEIVED'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>กำลังดำเนินการ</span></a>";
+     }else if(idata[i].status=='WAREHOUSE_SEND'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>กำลังดำเนินการ</span></a>";
+     }else if(idata[i].status=='SUPPLIER_RECEIVED'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>สินค้าถึงผู้ผลิตแล้ว</span></a>";
+     }else if(idata[i].status=='SUPPLIER_REPLY'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-info'>แจ้งผลการเคลม</span></a>";
+     }else if(idata[i].status=='warehouse_RECEIVED_SUP'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>กำลังดำเนินการ</span></a>";
+     }else if(idata[i].status=='warehouse_REPLY'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>กำลังดำเนินการ</span></a>";
+     }else if(idata[i].status=='OFFICER_RECEIVED'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>กำลังดำเนินการ</span></a>";
+     }else if(idata[i].status=='OFFICER_APPOINTMENT'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>นัดรับสินค้าเคลม</span></a>";
+     }else if(idata[i].status=='FINISH'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-success'>ปิดการเคลม</span></a>";
+     }
+
+                        }
+
+                        // เพิ่มรายการใช้บริการ
+                        tbl.append("<tr>\
+                                 <td class='text-center'>"+moment(idata[i].servicedate).format("DD/MM/YYYY")+"</td>\
+                                 <td>"+idata[i].branch+"</td>\
+                                 <td>"+idata[i].product+"</td>\
+                                 <td class='text-center'>"+idata[i].qty+"</td>\
+                                 <td class='text-center'>"+moment(idata[i].eow).format("DD/MM/YYYY")+"</td>\
+                                 <td class='text-center'>"+status+"</td>\
+                                 </tr>");
+
+                        
+                     }
+                }
+                }
+            }
+        );
+}
+
+</script>
+<style>
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        background-color:#fff;
+        //margin: 0;
+        //padding: 0;
+      }
+      #description {
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+      }
+
+      #infowindow-content .title {
+        font-weight: bold;
+      }
+
+      #infowindow-content {
+        display: none;
+      }
+
+     
+
+      #title {
+        color: #fff;
+        background-color: #4d90fe;
+        font-size: 25px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+      #target {
+        width: 345px;
+      }
+       input:invalid {
+    background-color: #FFAAAA;
+}
+    </style>
+</head>
+<body style="margin:0;">
+<% include partials/pageheaderbanner %> 
+ <div class="container" style="margin-top:5px;">
+<div class="page-header" style="margin-top:0px;margin-bottom:0px;"><h2 style="margin-top:0px;margin-bottom:0px;">SRR Claim Tracking System</h2></div>
+  <div id="page-wrapper">
+<h2>ค้นหาทะเบียนรถ</h2>
+<div class="row">
+<div class="col-md-12">
+   ใส่ทะเบียนรถ <input type="text" id="txt_search" name="txt_search"/> <input type="button" id="btn_search" name="btn_search" value="ค้นหา"><div id="checkresult"></div>
+</div>
+<div class="col-md-12" id="div_customer">
+    <h4>รายละเอียด</h4>
+    <div class="col-md-6">
+     ชื่อ-สกุล <label class="control-label"><div id="name"></div></label>
+    </div>
+    <div class="col-md-6">
+     เบอร์มือถือ <label class="control-label"><div id="mobile"></div></label>
+    </div>
+    
+</div>
+<div class="col-md-12" id="div_service">
+     <h4>รายละเอียดการใช้บริการ</h4>
+     <table id="tbl_service" class="table table-bordered">
+     <tbody>
+     </tbody>
+     </table>
+<div>
+    
+    </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<% include partials/script %>  
+  </body>
+</html>  
+
+
+

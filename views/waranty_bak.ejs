@@ -1,0 +1,883 @@
+<% include partials/head %> 
+<script>
+$(document).ready(function () {
+$('#div_Tirerow').hide();
+$('#div_Tirerow2').hide();
+$('#div_Wheelrow1').hide();
+$('#div_Wheelrow2').hide();
+$('#div_Wheelrow3').hide();
+$('#btn_showsearch').hide();
+$('#txt_mileage').hide();
+
+
+$('#ddl_tirebrand').on('change', function() {
+    Get_tireseries();
+    ClearDDL('ddl_tiresize');
+});
+$('#ddl_tireseries').on('change', function() {
+    Get_tiresize(); 
+});
+
+
+$('#ddl_wheelbrand').on('change', function() {
+    Get_wheelseries();
+    ClearDDL('ddl_PCD');
+    ClearDDL('ddl_Offset');
+    ClearDDL('ddl_wheelsize');
+});
+
+$('#ddl_wheelseries').on('change', function() {
+    Get_PCD();
+    ClearDDL('ddl_Offset');
+    ClearDDL('ddl_wheelsize');
+});
+
+$('#ddl_PCD').on('change', function() {
+    Get_Offset();
+    ClearDDL('ddl_wheelsize');
+});
+
+$('#ddl_Offset').on('change', function() {
+    Get_wheelsize();
+});
+
+
+$('#ddl_car').on('change', function() {
+    $('#txt_mileage').val('');
+    if ($('#ddl_car').val()!= '')
+    {
+        $('#btn_showsearch').show();
+        $('#txt_mileage').show();
+    }else{
+        $('#btn_showsearch').hide();
+        $('#txt_mileage').hide();
+    }
+});
+$('#ddl_producttype').on('change', function() {
+    ShowProductfield();
+    var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+});
+$('#btn_showsearch').on('click', function() {
+    $('#modalSearch').modal('show');
+});
+$("#tblproduct").on("click", ".delete-row", function () {
+      $(this).closest('tr').remove();
+    });
+$('#btn_search').on('click', function() {
+    CheckSearch();
+});
+$('#btn_clear').on('click', function() {
+   clearPopup();
+});
+$("#btn_insert").click(function(){
+        if ($("#ddl_car").val() =='')
+            {       
+            alert('โปรดเลือกรถที่เข้าใช้บริการ');
+            return false;
+            }
+
+        if ($("#txt_mileage").val() =='')
+            {       
+            alert('โปรดใส่เลขไมล์รถล่าสุด เพื่อเป็นข้อมูลประกอบการรับประกันเงื่อนไขพิเศษ');
+            return false;
+            }
+        var arr=[];
+        $('#tblproduct tbody tr').each(function(){
+            var product_id='';
+            var qty='';
+            var months='';
+            var years='';
+            data=$(this).find('.qty').find("input");
+            product_id=data[0].value;
+            qty=data[1].value;
+            days=data[2].value;
+            months=data[3].value;
+            years=data[4].value;
+            warantyconditions=data[5].value;
+            arr.push({'product_id':product_id,'qty':qty,'days':days,'months':months,'years':years,'warantyconditions':warantyconditions});
+        });
+
+        $.ajax({
+            url:  '../waranty/warantyproduct',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ cus_id:$('#hd_cusID').val(),car:$('#ddl_car').val(),mileage:$('#txt_mileage').val(),products:arr }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    window.location = data.redirect
+                }
+            }
+        );
+    });
+});
+
+function clearPopup(){
+    $('#ddl_tirebrand').val('');
+    $('#ddl_wheelbrand').val('');
+    $('#txt_name').val('');
+
+    ClearDDL('ddl_tireseries');
+    ClearDDL('ddl_tiresize');
+
+
+    ClearDDL('ddl_wheelseries');
+    ClearDDL('ddl_PCD');
+    ClearDDL('ddl_Offset');
+    ClearDDL('ddl_wheelsize');
+    var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+
+}
+function clearhidePopup(){
+ $('#modalSearch').modal('hide');
+    $('#ddl_tirebrand').val('');
+    $('#ddl_wheelbrand').val('');
+    $('#txt_name').val('');
+
+    ClearDDL('ddl_tireseries');
+    ClearDDL('ddl_tiresize');
+
+
+    ClearDDL('ddl_wheelseries');
+    ClearDDL('ddl_PCD');
+    ClearDDL('ddl_Offset');
+    ClearDDL('ddl_wheelsize');
+    var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+
+}
+
+function addproduct(product_id)
+{
+ $.ajax({
+            url:  '../waranty/addproduct',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ product_id:product_id }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproduct tbody');
+                     //tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+" " +data[i].remark+"</td>\
+                                 <td class='qty'><input type='hidden' name='hd_id' id='hd_id' value='"+data[i].id+"'/><input type='text' name='txt_qty' id='txt_qty' value='1'><input type='hidden' name='hd_day' id='hd_day' value='"+data[i].days+"'/><input type='hidden' name='hd_month' id='hd_month' value='"+data[i].months+"'/><input type='hidden' name='hd_year' id='hd_year' value='"+data[i].years+"'/><input type='hidden' name='hd_warantyconditions' id='hd_warantyconditions' value='"+data[i].warantyconditions+"'/></td>\
+                                 <td>"+moment(data[i].expired).format("DD/MM/YYYY")+" / ("+data[i].warantyconditions+")</td>\
+                                 <td class='delete-row'><a class=''  style='cursor: pointer;'>ลบรายการ</a></td>\
+                                 </tr>");
+                    }
+                    clearhidePopup();
+                }
+            }
+        );
+}
+
+function ShowProductfield()
+{
+    if ($('#ddl_producttype').val()=='wheel')
+    {
+        $('#div_Tirerow').hide();
+        $('#div_Tirerow2').hide();
+        $('#div_Wheelrow1').show();
+        $('#div_Wheelrow2').show();
+        $('#div_Wheelrow3').show();
+    }else if ($('#ddl_producttype').val()=='tire')
+    {
+        $('#div_Tirerow').show();
+        $('#div_Tirerow2').show();
+        $('#div_Wheelrow1').hide();
+        $('#div_Wheelrow2').hide();
+        $('#div_Wheelrow3').hide();
+    } else if ($('#ddl_producttype').val()=='Accessories')
+    {
+        $('#div_Tirerow').hide();
+        $('#div_Tirerow2').hide();
+        $('#div_Wheelrow1').hide();
+        $('#div_Wheelrow2').hide();
+        $('#div_Wheelrow3').hide();
+    } else{
+        $('#div_Tirerow').hide();
+        $('#div_Tirerow2').hide();
+        $('#div_Wheelrow1').hide();
+        $('#div_Wheelrow2').hide();
+        $('#div_Wheelrow3').hide();
+    }
+
+}
+
+function Get_tireseries()
+{
+$.ajax({
+            url:  '../waranty/Get_tireseries',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ tirebrand:$('#ddl_tirebrand').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var ddl=$('#ddl_tireseries');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกรุ่นสินค้า/ดอกยาง--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                     ddl.append("<option value='"+data[i]+"'  >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+
+}
+
+function Get_tiresize()
+{
+$.ajax({
+            url:  '../waranty/Get_tiresize',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ tirebrand:$('#ddl_tirebrand').val(),tireseries:$('#ddl_tireseries').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var ddl=$('#ddl_tiresize');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกขนาด--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                     ddl.append("<option value='"+data[i]+"'  >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+    
+}
+
+
+function Get_wheelseries()
+{
+$.ajax({
+            url:  '../waranty/Get_wheelseries',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ wheelbrand:$('#ddl_wheelbrand').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var ddl=$('#ddl_wheelseries');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกรุ่นสินค้า--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                     ddl.append("<option value='"+data[i]+"'  >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+
+}
+
+function Get_PCD()
+{
+$.ajax({
+            url:  '../waranty/Get_PCD',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ wheelbrand:$('#ddl_wheelbrand').val(),"wheelseries":$('#ddl_wheelseries').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var ddl=$('#ddl_PCD');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกPCD--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                     ddl.append("<option value='"+data[i]+"'  >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+}
+
+function Get_Offset()
+{
+$.ajax({
+            url:  '../waranty/Get_Offset',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ wheelbrand:$('#ddl_wheelbrand').val(),"wheelseries":$('#ddl_wheelseries').val(),"PCD":$('#ddl_PCD').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var ddl=$('#ddl_Offset');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกOffset--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                     ddl.append("<option value='"+data[i]+"'  >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+}
+
+function Get_wheelsize()
+{
+$.ajax({
+            url:  '../waranty/Get_wheelsize',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ wheelbrand:$('#ddl_wheelbrand').val(),"wheelseries":$('#ddl_wheelseries').val(),"PCD":$('#ddl_PCD').val(),"Offset":$('#ddl_Offset').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var ddl=$('#ddl_wheelsize');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกขนาด--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                     ddl.append("<option value='"+data[i]+"'  >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+    
+}
+
+function ClearDDL(Type){
+    if (Type=='ddl_tireseries')
+    {
+        var ddl=$('#ddl_tireseries');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกรุ่นสินค้า/ดอกยาง--</option>");
+
+    }else if (Type=='ddl_tiresize')
+    {
+        var ddl=$('#ddl_tiresize');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกขนาด--</option>");
+
+    }else if (Type=='ddl_wheelseries')
+    {
+        var ddl=$('#ddl_wheelseries');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกรุ่นสินค้า--</option>");
+
+    }else if (Type=='ddl_PCD')
+    {
+        var ddl=$('#ddl_PCD');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกPCD--</option>");
+
+    }else if (Type=='ddl_Offset')
+    {
+        var ddl=$('#ddl_Offset');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกOffset--</option>");
+
+    }else if (Type=='ddl_wheelsize')
+    {
+        var ddl=$('#ddl_wheelsize');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกขนาด--</option>");
+
+    }
+
+}
+
+
+function CheckSearch(){
+    if ($('#ddl_producttype').val()=='wheel')
+    {
+        if ($('#ddl_wheelbrand').val()!='')
+        {
+            if ($('#ddl_wheelseries').val()!='')
+            {
+                if ($('#ddl_PCD').val()!='')
+                {
+                    if ($('#ddl_Offset').val()!='')
+                    {
+                        if ($('#ddl_wheelsize').val()!='')
+                        {
+                            searchwheelsize();
+                        }else{
+                            searchOffset();
+                        }
+                    }else{
+                        searchPCD();
+                    }
+                }else{
+                    searchwheelseries();
+                }
+            }else{
+            searchwheelbrand();
+            }
+        }else{
+        searchtype();
+        }
+    }else if ($('#ddl_producttype').val()=='tire')
+    {
+        if ($('#ddl_tirebrand').val()!='')
+        {
+            if ($('#ddl_tireseries').val()!='')
+            {
+                if ($('#ddl_tiresize').val()!='')
+                {
+                    searchtiresize();
+                }else{
+                    searchtireseries();
+                }
+            }else{
+            searchtirebrand();
+            }
+        }else{
+        searchtype();
+        }
+    } else if ($('#ddl_producttype').val()=='Accessories')
+    {
+        searchtype();
+    }else{
+        search();
+    }
+}
+
+function search(){
+        $.ajax({
+            url:  '../waranty/search',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ txt_name:$('#txt_name').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+}
+
+function searchtype(){
+        $.ajax({
+            url:  '../waranty/searchtype',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+}
+
+function searchtirebrand(){
+        $.ajax({
+            url:  '../waranty/searchtirebrand',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_tirebrand:$('#ddl_tirebrand').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+}
+
+function searchtireseries(){
+        $.ajax({
+            url:  '../waranty/searchtireseries',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_tirebrand:$('#ddl_tirebrand').val(),ddl_tireseries:$('#ddl_tireseries').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+}
+
+function searchtiresize(){
+        $.ajax({
+            url:  '../waranty/searchtiresize',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_tirebrand:$('#ddl_tirebrand').val(),ddl_tireseries:$('#ddl_tireseries').val(),ddl_tiresize:$('#ddl_tiresize').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+}
+
+function searchwheelbrand(){
+        $.ajax({
+            url:  '../waranty/searchwheelbrand',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_wheelbrand:$('#ddl_wheelbrand').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+}
+
+function searchwheelseries(){
+        $.ajax({
+            url:  '../waranty/searchwheelseries',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_wheelbrand:$('#ddl_wheelbrand').val(),ddl_wheelseries:$('#ddl_wheelseries').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+}
+
+function searchPCD(){
+        $.ajax({
+            url:  '../waranty/searchPCD',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_wheelbrand:$('#ddl_wheelbrand').val(),ddl_wheelseries:$('#ddl_wheelseries').val(),ddl_PCD:$('#ddl_PCD').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\<td>ระยะเวลารับประกัน:"+data[i].months+' เดือน '+data[i].years+' ปี'+"</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+}
+
+function searchOffset(){
+        $.ajax({
+            url:  '../waranty/searchOffset',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_wheelbrand:$('#ddl_wheelbrand').val(),ddl_wheelseries:$('#ddl_wheelseries').val(),ddl_PCD:$('#ddl_PCD').val(),ddl_Offset:$('#ddl_Offset').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+}
+
+function searchwheelsize(){
+        $.ajax({
+            url:  '../waranty/searchwheelsize',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_wheelbrand:$('#ddl_wheelbrand').val(),ddl_wheelseries:$('#ddl_wheelseries').val(),ddl_PCD:$('#ddl_PCD').val(),ddl_Offset:$('#ddl_Offset').val(),ddl_wheelsize:$('#ddl_wheelsize').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+}
+
+</script>
+</head>
+<body>
+
+ <div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">เพิ่มการรับประกันสินค้า
+
+			
+                        </h1> 
+
+                    </div>
+ <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                 <div class="col-md-6"> 
+                       <label class="control-label">ชื่อ-นามสกุล:<%=customer ? customer.customerInfo.name : ""%> <%=customer ? customer.customerInfo.lastname: ""%></label>
+                 </div>
+                 <div class="col-md-6"> 
+                       <label class="control-label">โทรศัพท์:<%=customer ? customer.customerInfo.mobile: ""%></label>
+                 </div>
+                 </br>
+                 <input type="hidden" name="hd_cusID" id="hd_cusID" value="<%=customer ? customer._id:""%>"/>
+                </div>
+<div class="row">
+<div class="col-md-4"> 
+ <select class="form-control" id="ddl_car" name="ddl_car">
+                    <option value="">--เลือกรถที่เข้ารับบริการ--</option>
+                    <% if (cars){ for(var i=0; i<cars.length; i++) { %>
+                        <option value="<%=cars[i]._id%>"><%=cars[i].carInfo.licenseNo%></option>
+                        <% }} %>
+                    </select>             
+</div>
+<div class="col-md-2">
+ <input type="text" class="form-control" id="txt_mileage" name="txt_mileage" value="" placeholder="เลขไมล์ล่าสุด" />
+</div>
+</div>  
+<div class="row">
+<div class="col-md-12 from-group">
+<h3>รายการสินค้า <input type="button" class="btn btn-lg btn-success" id="btn_showsearch" name="btn_showsearch" value="ค้นหาและเพิ่ม"/>
+</h3></div>
+ <div class="col-md-12">
+  <table class="table table-bordered" id="tblproduct">
+                        <thead>
+                        <tr>
+                        <td>รายละเอียดสินค้า</td>
+                        <td>จำนวนสินค้า</td>
+                        <td>ระยะเวลารับประกัน</td>
+                        <td></td>
+                        </tr>
+                        </thead>
+                            <tbody>
+                            </tbody>
+  </table>
+</div>
+ </div>  
+ <div class="row">
+<input type="button" class="btn btn-lg btn-primary" id="btn_insert" name="btn_insert" value="บันทึกข้อมูล"/>
+
+</div>            
+			</div>
+	         </div>
+            </div>
+            <!-- /.container-fluid -->
+
+
+	   
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+
+/*popup search item*/
+<div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="min-width: 80%;max-width:95%; min-height: 40%;max-height:40%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">ค้นหาสินค้า</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">        
+                    <select class="form-control" id="ddl_producttype" name="ddl_producttype">
+                    <option value="">--เลือกประเภทสินค้า--</option>
+                    <% for(var i=0; i<producttype.length; i++) { %>
+                    <option value="<%=producttype[i].value%>" ><%=producttype[i].value%></option>
+                    <% } %>
+                    </select>
+                    </div>
+                    <div class="col-md-8">        
+                    <label class="control-label">ชื่อสินค้า</label>
+                    <input type="text" id="txt_name" name="txt_name" value="" />
+                    <input type="button" id="btn_search" name="btn_search" value="ค้นหา"/>
+                    <input type="button" id="btn_clear" name="btn_clear" value="ลบการค้นหา"/>
+                    </div>
+</div>
+
+<div class="row" id="div_Tirerow">
+<div class="form-group col-lg-3">
+<label class="control-label">ยี่ห้อยาง</label>
+  <select class="form-control" id="ddl_tirebrand" name="ddl_tirebrand">
+                        <option value="">--เลือกยี่ห้อยาง--</option>
+                        <% for(var i=0; i<tirebrand.length; i++) { %>
+                        <option value="<%=tirebrand[i].value%>" ><%=tirebrand[i].value%></option>
+                        <% } %>
+</select>
+</div>
+<div class="form-group col-lg-3">
+<label class="control-label">รุ่นสินค้า/ดอกยาง</label>
+  <select class="form-control" id="ddl_tireseries" name="ddl_tireseries">
+                        <option value="">--เลือกรุ่นสินค้า/ดอกยาง--</option>
+</select>
+</div>
+
+<div class="form-group col-lg-3">
+<label class="control-label">ขนาด</label>
+  <select class="form-control" id="ddl_tiresize" name="ddl_tiresize">
+                        <option value="">--เลือกขนาด--</option>
+</select>
+</div>
+<div class="form-group col-lg-3">
+
+</div>
+</div>
+
+
+<div class="row" id="div_Wheelrow1">
+<div class="form-group col-lg-3">
+<label class="control-label">ยี่ห้อ</label>
+  <select class="form-control" id="ddl_wheelbrand" name="ddl_wheelbrand">
+                        <option value="">--เลือกยี่ห้อ--</option>
+                        <% for(var i=0; i<wheelbrand.length; i++) { %>
+                        <option value="<%=wheelbrand[i].value%>" ><%=wheelbrand[i].value%></option>
+                        <% } %>
+</select>
+</div>
+<div class="form-group col-lg-3">
+<label class="control-label">รุ่นสินค้า</label>
+  <select class="form-control" id="ddl_wheelseries" name="ddl_wheelseries">
+                        <option value="">--เลือกรุ่นสินค้า--</option>
+                        
+</select>
+</div>
+
+<div class="form-group col-lg-3">
+<label class="control-label">PCD</label>
+  <select class="form-control" id="ddl_PCD" name="ddl_PCD">
+                        <option value="">--เลือกPCD--</option>
+</select>
+</div>
+<div class="form-group col-lg-3">
+<label class="control-label">Offset</label>
+  <select class="form-control" id="ddl_Offset" name="ddl_Offset">
+                        <option value="">--เลือกOffset--</option>
+</select>
+</div>
+
+</div>
+<div class="row" id="div_Wheelrow2">
+<div class="form-group col-lg-3">
+<label class="control-label">ขนาด</label>
+  <select class="form-control" id="ddl_wheelsize" name="ddl_wheelsize">
+                        <option value="">--เลือกขนาด--</option>
+</select>
+</div>
+<div class="form-group col-lg-3">
+
+</div>
+</div>
+                <div class="row">
+                    <div class="table-responsive">
+                        <div class="col-md-12 col-xd-12 col-lg-12">
+                        <table class="table table-hover table-striped" id="tblproducts">             
+                            <tbody>
+                            </tbody>
+                        </table>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<% include partials/script %>  
+  </body>
+</html>  

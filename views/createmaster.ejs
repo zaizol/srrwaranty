@@ -1,0 +1,72 @@
+<% include partials/head %> 
+<script>
+$(document).ready(function () {
+  
+});
+</script>
+</head>
+<body>
+
+ <div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">ข้อมูลมาสเตอร์
+
+			
+                        </h1> 
+
+                    </div>
+ <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->
+<form  acton="/createmaster<%= master ? "/"+master._id : "" %>" method="post">
+<div class="row">
+<div class="form-group col-lg-6">
+<label class="control-label">ประเภท</label>
+<input type="text" id="txt_type" name="txt_type" value="<%= master ?  master.type ? master.type : "" :"" %>" />
+</div>
+<div class="form-group col-lg-6">
+<label class="control-label">ค่า</label>
+<input type="text" id="txt_name" name="txt_name" value="<%= master ?  master.name ? master.name : "" :"" %>" />
+</div>
+<div class="form-group col-lg-6">
+<label class="control-label">หมายเหตุ</label>
+<input type="text" id="txt_remark" name="txt_remark" value="<%= master ?  master.remark ? master.remark : "" :"" %>" />
+</div>
+<div class="form-group col-lg-6">
+<label class="control-label">ลำดับ</label>
+<input type="text" id="txt_orders" name="txt_orders" value="<%= master ?  master.orders ? master.orders : "" :"" %>" />
+</div>
+<div class="form-group col-lg-12">
+<input type="hidden" name="hd_type" id="hd_type"/> 
+ <button class="btn btn-success btn-lg" id="btn_add" type="submit">เพิ่มข้อมูล</button>
+</div>
+
+</div>
+</form>
+
+
+			</div>
+	     </div>
+     </div>
+            <!-- /.container-fluid -->
+
+
+	   
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+<% include partials/script %>  
+  </body>
+</html>  

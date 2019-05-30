@@ -1,0 +1,582 @@
+
+<% include partials/headstep %> 
+<script>
+$(document).ready(function () {
+  $('#smartwizard').smartWizard({
+                    selected: 0,
+                    theme: 'circles',
+                    transitionEffect:'fade',
+                    showStepURLhash: true,
+                    toolbarSettings:{
+                        showNextButton:false,
+                        showPreviousButton:false
+                    },
+                    cycleSteps:true
+            });
+
+/*$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");*/
+//loaddata(0);
+getdataforpopup($('#hd_claimid').val());
+});
+
+
+function getdataforpopup(id){
+$.ajax({
+            url:  '../claimstep/getdataforpopup/'+id,
+            type: 'GET',
+            dataType: 'JSON',
+            data: JSON.stringify({}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    loaddata(data);
+                }
+            }
+        );
+}
+
+
+function loaddata(data)
+{
+var Isshow_S_1=0;
+var Isshow_S_2_1=0;
+var Isshow_S_2_2=0;
+var Isshow_S_2_3=0;
+
+var Isshow_S_3_1=0;
+var Isshow_S_3_2=0;
+var Isshow_S_3_3=0;
+var Isshow_S_3_4=0;
+
+
+var Isshow_S_4_1=0;
+var Isshow_S_4_2=0;
+
+switch (data[0].claimstatus)
+{
+case "OFFICER_SENDNEW":
+Isshow_S_1=1;
+break;
+case "WAREHOUSE_RECEIVED":
+Isshow_S_1=1;
+Isshow_S_2_1=1;
+$('#smartwizard').smartWizard("next");
+break;
+case "WAREHOUSE_SEND":
+Isshow_S_1=1;
+Isshow_S_2_1=1;
+Isshow_S_2_2=1;
+$('#smartwizard').smartWizard("next");
+break;
+case "SUPPLIER_RECEIVED":
+Isshow_S_1=1;
+Isshow_S_2_1=1;
+Isshow_S_2_2=1;
+Isshow_S_2_3=1;
+$('#smartwizard').smartWizard("next");
+break;
+case "SUPPLIER_REPLY":
+Isshow_S_1=1;
+Isshow_S_2_1=1;
+Isshow_S_2_2=1;
+Isshow_S_2_3=1;
+
+Isshow_S_3_1=1;
+$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");
+break;
+case "warehouse_RECEIVED_SUP":
+Isshow_S_1=1;
+Isshow_S_2_1=1;
+Isshow_S_2_2=1;
+Isshow_S_2_3=1;
+
+Isshow_S_3_1=1;
+Isshow_S_3_2=1;
+$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");
+break;
+case "warehouse_REPLY":
+Isshow_S_1=1;
+Isshow_S_2_1=1;
+Isshow_S_2_2=1;
+Isshow_S_2_3=1;
+
+Isshow_S_3_1=1;
+Isshow_S_3_2=1;
+Isshow_S_3_3=1;
+$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");
+break;
+case "OFFICER_RECEIVED":
+Isshow_S_1=1;
+Isshow_S_2_1=1;
+Isshow_S_2_2=1;
+Isshow_S_2_3=1;
+
+Isshow_S_3_1=1;
+Isshow_S_3_2=1;
+Isshow_S_3_3=1;
+Isshow_S_3_4=1;
+$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");
+break;
+case "OFFICER_APPOINTMENT":
+Isshow_S_1=1;
+Isshow_S_2_1=1;
+Isshow_S_2_2=1;
+Isshow_S_2_3=1;
+
+Isshow_S_3_1=1;
+Isshow_S_3_2=1;
+Isshow_S_3_3=1;
+Isshow_S_3_4=1;
+
+Isshow_S_4_1=1;
+$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");
+break;
+case "warehouse_CLOSE":
+Isshow_S_1=1;
+Isshow_S_2_1=1;
+Isshow_S_2_2=1;
+Isshow_S_2_3=1;
+
+Isshow_S_3_1=1;
+Isshow_S_3_2=1;
+Isshow_S_3_3=1;
+
+Isshow_S_4_2=1;
+$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");
+break;
+case "FINISH":
+Isshow_S_1=1;
+Isshow_S_2_1=1;
+Isshow_S_2_2=1;
+Isshow_S_2_3=1;
+
+Isshow_S_3_1=1;
+Isshow_S_3_2=1;
+Isshow_S_3_3=1;
+Isshow_S_3_4=1;
+
+Isshow_S_4_1=1;
+Isshow_S_4_2=1;
+$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");
+$('#smartwizard').smartWizard("next");
+break;
+}
+
+
+if(Isshow_S_1 ==1)
+{
+var productname=data[0].productname  + ' \r\nรหัสสินค้า:' + data[0].productproductcode;
+var claimdate=moment(data[0].claimdate).format("DD/MM/YYYY");
+var claimbyname=data[0].claimbyname;
+var claimqty=data[0].claimqty;
+var claimremark=data[0].claimremark;
+var claimbranch=data[0].claimbranch;
+
+$('#lbl_claimdate').text(claimdate);
+$('#lbl_claimemployer').text(claimbyname);
+$('#lbl_claimbranch').text(claimbranch);
+$('#lbl_productdetail').text(productname);
+$('#lbl_qty').text(claimqty);
+$('#lbl_remark').text(claimremark);
+
+}
+
+if(Isshow_S_2_1 ==1)
+{
+var warehouse_receivedate =moment(data[0].warehouse_receivedate).format("DD/MM/YYYY") + '...' +data[0].warehouse_receivebyname + ' จำนวน '+data[0].warehouse_receiveqty ;
+var warehouse_remark = data[0].warehouse_remark;
+$('#div_warehouse_receive').show();
+$('#lbl_warehouse_receivedate').text(warehouse_receivedate);
+$('#lbl_warehouse_remark').text(warehouse_remark);
+}
+if(Isshow_S_2_2 ==1)
+{
+var warehouse_senddate=moment(data[0].warehouse_senddate).format("DD/MM/YYYY") + '...' +data[0].warehouse_sendbyname + ' จำนวน '+data[0].warehouse_sendqty ;
+var warehouse_sendremark=data[0].warehouse_sendremark;
+$('#div_warehouse_send').show();
+$('#lbl_warehouse_senddate').text(warehouse_senddate);
+$('#lbl_warehouse_sendremark').text(warehouse_sendremark);
+}
+if(Isshow_S_2_3 ==1)
+{
+var supplier_receivedate=moment(data[0].supplier_receivedate).format("DD/MM/YYYY") + '...' +data[0].supplier_receivebyname + ' จำนวน '+data[0].supplier_receiveqty ;
+var supplier_receiveremark=data[0].supplier_receiveremark;
+$('#div_supplier_receive').show();
+$('#lbl_supplier_receivedate').text(supplier_receivedate);
+$('#lbl_supplier_receiveremark').text(supplier_receiveremark);
+}
+
+if(Isshow_S_3_1 ==1)
+{
+var supplier_replydate=moment(data[0].supplier_replydate).format("DD/MM/YYYY") + '...' +data[0].supplier_replybyname + ' จำนวน '+data[0].supplier_replyqty ;
+var supplier_resultremark= data[0].supplier_replyresult+' ' +data[0].supplier_resultremark;
+$('#div_supplier_reply').show();
+$('#lbl_supplier_replydate').text(supplier_replydate);
+if (data[0].supplier_replyresult=="เคลมเป็น CN" || data[0].supplier_replyresult=="เคลมกลับไม่ตรงรุ่น")
+{
+$('#lbl_supplier_resultremark').text('เคลมได้'+' '+data[0].supplier_resultremark);
+}else{
+$('#lbl_supplier_resultremark').text(supplier_resultremark);
+}
+
+}
+if(Isshow_S_3_2 ==1)
+{
+var warehouse_SUP_receivedate=moment(data[0].warehouse_SUP_receivedate).format("DD/MM/YYYY") + '...' +data[0].warehouse_SUP_receivebyname + ' จำนวน '+data[0].warehouse_SUP_receiveqty ;
+var warehouse_SUP_remark=data[0].warehouse_SUP_remark;
+$('#div_warehouse_SUP_receive').show();
+$('#lbl_warehouse_SUP_receivedate').text(warehouse_SUP_receivedate);
+$('#lbl_warehouse_SUP_remark').text(warehouse_SUP_remark);
+}
+if(Isshow_S_3_3 ==1)
+{
+var warehouse_replydate=moment(data[0].warehouse_replydate).format("DD/MM/YYYY") + '...' +data[0].warehouse_replybyname + ' จำนวน '+data[0].warehouse_replyqty ;
+var warehouse_replyremark=data[0].warehouse_replyremark;
+$('#div_warehouse_reply').show();
+$('#lbl_warehouse_replydate').text(warehouse_replydate);
+$('#lbl_warehouse_replyremark').text(warehouse_replyremark);
+}
+if(Isshow_S_3_4 ==1)
+{
+var claim_receivedate=moment(data[0].claim_receivedate).format("DD/MM/YYYY") + '...' +data[0].claim_receivebyname + ' จำนวน '+data[0].claim_receiveqty ;
+var claim_receiveremark=data[0].claim_receiveremark;
+$('#div_claim_receive').show();
+$('#lbl_claim_receivedate').text(claim_receivedate);
+$('#lbl_claim_receiveremark').text(claim_receiveremark);
+}
+
+
+if(Isshow_S_4_1 ==1)
+{
+var claim_Appointmentdate=moment(data[0].claim_Appointmentday).format("DD/MM/YYYY") + '...' +data[0].claim_Appointmentbyname ;
+var claim_Appointmentremark=data[0].claim_Appointmentremark;
+$('#div_claim_Appointment').show();
+$('#lbl_claim_Appointmentdate').text(claim_Appointmentdate);
+$('#lbl_claim_Appointmentremark').text(claim_Appointmentremark);
+}
+
+if(Isshow_S_4_2 ==1)
+{
+    if (data[0].IsAccountwork!= "")
+    {
+var customer_receivedclaimdate=moment(data[0].warehouse_replydate).format("DD/MM/YYYY") + '...' +data[0].warehouse_replybyname + ' จำนวน '+data[0].warehouse_replyqty ;
+var customer_receivedremark=data[0].warehouse_replyremark;
+$('#div_customer_receivedclaim').show();
+$('#lbl_customer_receivedclaimdate').text(customer_receivedclaimdate);
+$('#lbl_customer_receivedremark').text(customer_receivedremark);
+
+    }else{
+var customer_receivedclaimdate=moment(data[0].customer_receivedclaimdate).format("DD/MM/YYYY") + '...' +data[0].customer_receivedbyname + ' จำนวน '+data[0].customer_receivedqty ;
+var customer_receivedremark=data[0].customer_receivedremark;
+$('#div_customer_receivedclaim').show();
+$('#lbl_customer_receivedclaimdate').text(customer_receivedclaimdate);
+$('#lbl_customer_receivedremark').text(customer_receivedremark);
+    }
+
+
+}
+
+
+}
+
+
+</script>
+<style>
+ .body{
+     backgroup-color:#fff;
+ }
+
+.box {
+  background:#fff;
+  transition:all 0.2s ease;
+  border:2px dashed #dadada;
+  margin-top: 10px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  background-clip: padding-box;
+  padding:0 20px 20px 20px;
+  min-height:340px;
+}
+
+.box:hover {
+  /*border:2px solid #525C7A;*/
+}
+
+.box span.box-title {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 300;
+    text-transform: uppercase;
+}
+
+.box .box-content {
+  padding: 16px;
+  border-radius: 0 0 2px 2px;
+  background-clip: padding-box;
+  box-sizing: border-box;
+}
+.box .box-content p {
+  color:#515c66;
+  text-transform:none;
+}
+.jumbotron {
+/*background-image: url('http://goo.gl/04j7Nn');*/
+}
+</style>
+<body style="margin-top:0px">
+<% include partials/pageheaderbanner %> 
+<input type="hidden" id="hd_claimid" value="<%=claimid%>">
+<div class="container" style="margin-top:5px;">
+<div class="page-header" style="margin-top:0px;margin-bottom:20px;"><h2 style="margin-top:0px;margin-bottom:0px;">SRR Claim Tracking System</h2></div>
+<div id="smartwizard">
+    <ul>
+        <li><a href="#step-1">แจ้งเคลม<br /><small>แจ้งเคลมสินค้า</small></a></li>
+        <li><a href="#step-2">อยู่ระหว่างดำเนินการ<br /><small>รายละเอียดการดำเนินการ</small></a></li>
+        <li><a href="#step-3">ผลการเคลม<br /><small>ผลการเคลมสินค้า</small></a></li>
+        <li><a href="#step-4">รับสินค้าเคลม<br /><small>แจ้งรับสินค้าเคลม</small></a></li>
+    </ul>
+
+    <div>
+        <div id="step-1" class="">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <div class="box-content">
+                            <h3 class="tag-title">รายละเอียดการแจ้งเคลม</h3>
+                            <hr />
+                             <div class="row">
+            <div class="col-lg-2 col-xs-2 text-right">
+            <label class="control-label">วันที่แจ้งเคลมสินค้า</label>
+            </div>                   
+            <div class="col-lg-4 col-xs-4">
+            <label class="control-label" id="lbl_claimdate">-</label>
+            </div>
+             <div class="col-lg-2 col-xs-2 text-right">
+            <label class="control-label"></label>
+            </div>                   
+            <div class="col-lg-4 col-xs-4">
+            
+            </div>
+            </div>      
+            <div class="row">
+            <div class="col-lg-2 col-xs-2 text-right">
+            <label class="control-label">พนักงานที่รับเคลม</label>
+            </div>                   
+            <div class="col-lg-4 col-xs-4">
+            <label class="control-label" id="lbl_claimemployer">-</label>
+            </div>
+             <div class="col-lg-2 col-xs-2 text-right">
+            <label class="control-label">สาขา</label>
+            </div>                   
+            <div class="col-lg-4 col-xs-4">
+            <label class="control-label" id="lbl_claimbranch">-</label>
+            </div>
+            </div>      
+            <div class="row">
+                <div class="col-lg-2 col-xs-2 text-right">
+                <label class="control-label">รายละเอียดสินค้า</label>
+                </div>                   
+                <div class="col-lg-4 col-xs-4">
+                <label class="control-label"  id="lbl_productdetail">-</label>
+                </div>
+                <div class="col-lg-2 col-xs-2 text-right">
+                <label class="control-label">จำนวนสินค้าที่ส่งเคลม</label>
+                </div>                   
+                <div class="col-lg-4 col-xs-4">
+                <label class="control-label"  id="lbl_qty">-</label>
+                </div>
+            </div>  
+            <div class="row">
+                <div class="col-lg-2 col-xs-2 text-right">
+                <label class="control-label">รายละเอียด</label>
+                </div>                   
+                <div class="col-lg-10  col-xs-10">
+                <label class="control-label" id="lbl_remark">-</label>
+                </div>
+            </div>  
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>           
+
+       
+        </div>
+        <div id="step-2" class="">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <div class="box-content">
+                            <h3 class="tag-title">การดำเนินการเคลมสินค้า</h3>
+                            <hr />
+                            <div class="row" id="div_warehouse_receive" style="display:none;">
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">วันที่รับสินค้า</label>
+                                </div>                   
+                                <div class="col-lg-3 col-xs-3">
+                                    <label class="control-label"  id="lbl_warehouse_receivedate">-</label>
+                                </div>
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">รายละเอียด</label>
+                                </div>                   
+                                <div class="col-lg-5 col-xs-5">
+                                    <label class="control-label"  id="lbl_warehouse_remark">-</label>
+                                </div>
+                            </div>
+                            <div class="row" id="div_warehouse_send" style="display:none;">
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">วันที่ส่งสินค้าไปsupplier</label>
+                                </div>                   
+                                <div class="col-lg-3 col-xs-3">
+                                    <label class="control-label"  id="lbl_warehouse_senddate">-</label>
+                                </div>
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">รายละเอียด</label>
+                                </div>                   
+                                <div class="col-lg-5 col-xs-5">
+                                    <label class="control-label"  id="lbl_warehouse_sendremark">-</label>
+                                </div>
+                            </div>
+                            <div class="row" id="div_supplier_receive" style="display:none;">
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">วันที่supplierรับสินค้า</label>
+                                </div>                   
+                                <div class="col-lg-3 col-xs-3">
+                                    <label class="control-label"  id="lbl_supplier_receivedate">-</label>
+                                </div>
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">รายละเอียด</label>
+                                </div>                   
+                                <div class="col-lg-5 col-xs-5">
+                                    <label class="control-label"  id="lbl_supplier_receiveremark">-</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        <div id="step-3" class="">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <div class="box-content">
+                            <h3 class="tag-title">ผลการเคลมสินค้า</h3>
+                            <hr />
+                            <div class="row" id="div_supplier_reply" style="display:none;">
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">วันที่แจ้งผล</label>
+                                </div>                   
+                                <div class="col-lg-3 col-xs-3">
+                                    <label class="control-label"  id="lbl_supplier_replydate">-</label>
+                                </div>
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">รายละเอียด</label>
+                                </div>                   
+                                <div class="col-lg-5 col-xs-5">
+                                    <label class="control-label"  id="lbl_supplier_resultremark">-</label>
+                                </div>
+                            </div>
+                            <div class="row" id="div_warehouse_SUP_receive" style="display:none;">
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">วันที่รับส่งสินค้ากลับ</label>
+                                </div>                   
+                                <div class="col-lg-3 col-xs-3">
+                                    <label class="control-label"  id="lbl_warehouse_SUP_receivedate">-</label>
+                                </div>
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">รายละเอียด</label>
+                                </div>                   
+                                <div class="col-lg-5 col-xs-5">
+                                    <label class="control-label"  id="lbl_warehouse_SUP_remark">-</label>
+                                </div>
+                            </div> 
+                            <div class="row" id="div_warehouse_reply" style="display:none;">
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">วันที่ส่งสินค้าไปต้นทาง</label>
+                                </div>                   
+                                <div class="col-lg-3 col-xs-3">
+                                    <label class="control-label"  id="lbl_warehouse_replydate">-</label>
+                                </div>
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">รายละเอียด</label>
+                                </div>                   
+                                <div class="col-lg-5 col-xs-5">
+                                    <label class="control-label"  id="lbl_warehouse_replyremark">-</label>
+                                </div>
+                            </div> 
+                            <div class="row" id="div_claim_receive" style="display:none;">
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">วันที่สินค้าถึงผู้เคลม</label>
+                                </div>                   
+                                <div class="col-lg-3 col-xs-3">
+                                    <label class="control-label"  id="lbl_claim_receivedate">-</label>
+                                </div>
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">รายละเอียด</label>
+                                </div>                   
+                                <div class="col-lg-5 col-xs-5">
+                                    <label class="control-label"  id="lbl_claim_receiveremark">-</label>
+                                </div>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        <div id="step-4" class="">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box">
+                        <div class="box-content">
+                            <h3 class="tag-title">แจ้งรับสินค้าเคลม</h3>
+                            <hr />
+                            <div class="row" id="div_claim_Appointment" style="display:none;">
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">วันที่แจ้งรับสินค้า</label>
+                                </div>                   
+                                <div class="col-lg-3 col-xs-3">
+                                    <label class="control-label"  id="lbl_claim_Appointmentdate">-</label>
+                                </div>
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">รายละเอียด</label>
+                                </div>                   
+                                <div class="col-lg-5 col-xs-5">
+                                    <label class="control-label"  id="lbl_claim_Appointmentremark">-</label>
+                                </div>
+                            </div>
+                            <div class="row" id="div_customer_receivedclaim" style="display:none;">
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">วันที่ปิดการเคลม</label>
+                                </div>                   
+                                <div class="col-lg-3 col-xs-3">
+                                    <label class="control-label"  id="lbl_customer_receivedclaimdate">-</label>
+                                </div>
+                                <div class="col-lg-2 col-xs-2 text-right">
+                                    <label class="control-label">รายละเอียด</label>
+                                </div>                   
+                                <div class="col-lg-5 col-xs-5">
+                                    <label class="control-label"  id="lbl_customer_receivedremark">-</label>
+                                </div>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+</div>
+<% include partials/script %>  
+  </body>
+</html>  

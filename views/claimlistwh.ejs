@@ -1,0 +1,1316 @@
+
+
+
+<% include partials/head %> 
+<script>
+Date.prototype.addDays = function(days) {
+    this.setDate(this.getDate() + parseInt(days));
+    return this;
+};
+jQuery.fn.ForceNumericOnly =
+function()
+{
+    return this.each(function()
+    {
+        $(this).keydown(function(e)
+        {
+            var key = e.charCode || e.keyCode || 0;
+            // allow backspace, tab, delete, enter, arrows, numbers and keypad numbers ONLY
+            // home, end, period, and numpad decimal
+            return (
+                key == 8 || 
+                key == 9 ||
+                key == 13 ||
+                key == 46 ||
+                key == 110 ||
+                key == 190 ||
+                (key >= 35 && key <= 40) ||
+                (key >= 48 && key <= 57) ||
+                (key >= 96 && key <= 105));
+        });
+    });
+};
+$(document).ready(function () {
+var HttPRequest = false;
+
+var follow_date = new Date();
+ 			
+
+$('.input-group.date').datetimepicker({
+			defaultDate:follow_date,
+      format: 'DD/MM/YYYY',
+		});
+            
+//SET First Date to query
+var firstDay = moment().startOf('month').format('DD/MM/YYYY');
+$('#txt_from').val(firstDay);
+$('#txt_to').val(moment().format('DD/MM/YYYY'));
+
+$('#txt_qty').ForceNumericOnly();
+$('#txt_qtySendSUP').ForceNumericOnly();
+$('#txt_qtysupreceive').ForceNumericOnly();
+$('#txt_qtysupreply').ForceNumericOnly();
+$('#txt_qtywarehouse_SUP_receive').ForceNumericOnly();
+$('#txt_qtywarehouse_REPLY').ForceNumericOnly();
+
+
+Get_branch();
+
+    
+$(document).on('click', '.receive', function () {
+        var $this = $(this);
+        var id=$this.parent().parent().find('.claimid').find('#hd_id').val();
+        getdataforpopup(id,'receive'); 
+});
+
+$(document).on('click', '.sendsup', function () {
+        var $this = $(this);
+        var id=$this.parent().parent().find('.claimid').find('#hd_id').val();
+        getdataforpopup(id,'sendsup');
+});
+
+$(document).on('click', '.supreceive', function () {
+        var $this = $(this);
+        var id=$this.parent().parent().find('.claimid').find('#hd_id').val();
+        getdataforpopup(id,'supreceive');
+});
+
+$(document).on('click', '.supreply', function () {
+        var $this = $(this);
+        var id=$this.parent().parent().find('.claimid').find('#hd_id').val();
+        getdataforpopup(id,'supreply');
+});
+
+$(document).on('click', '.warehouse_SUP_receive', function () {
+        var $this = $(this);
+        var id=$this.parent().parent().find('.claimid').find('#hd_id').val();
+        getdataforpopup(id,'warehouse_SUP_receive');
+});
+
+$(document).on('click', '.warehouse_REPLY', function () {
+        var $this = $(this);
+        var id=$this.parent().parent().find('.claimid').find('#hd_id').val();
+        getdataforpopup(id,'warehouse_REPLY');
+});
+
+
+
+    
+     $("#btn_search").click(function(){
+         loaddata();
+    });
+      $("#btn_submit").click(function(){
+        var str='';
+        if(str != ''){
+            alert('โปรดตรวจสอบข้อมูล '+str + 'ให้ครบถ้วน');
+            return false;
+        }
+    });
+     
+loaddata();
+
+$('#btn_receive').on('click', function() {
+    receive();
+});
+$('#btn_SendSUP').on('click', function() {
+    SendSUP();
+});
+$('#btn_supreceive').on('click', function() {
+    supreceive();
+});
+
+$('#btn_supreply').on('click', function() {
+    supreply();
+});
+
+$('#btn_warehouse_SUP_receive').on('click', function() {
+    warehouse_SUP_receive();
+});
+
+$('#btn_warehouse_REPLY').on('click', function() {
+    if ($('#hd_claimclose').val()==1)
+    {
+     warehouse_CLOSE();
+    }else{
+      warehouse_REPLY();
+    }
+    
+});
+
+
+});
+
+function Get_branch()
+{
+$.ajax({
+            url:  '../claimlistwh/Get_branch',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify(),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var ddl=$('#ddl_branch');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกสาขา--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                     ddl.append("<option value='"+data[i]+"'  >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+
+}
+
+
+function loaddata(){
+$.ajax({
+            url:  '../claimlistwh/loaddata',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {'search':$('#txt_search').val(),ddl_branch:$('#ddl_branch').val(),txt_from:$('#txt_from').val(),txt_to:$('#txt_to').val()},
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 bind(data);
+                }
+            }
+        );
+}
+
+
+function bind(data)
+{
+
+var idata=jQuery.parseJSON(JSON.stringify(data));
+var tbl=$('#tbl_claimlist tbody');
+                     tbl.empty();
+if (idata.length==0){
+ tbl.append("<tr>\
+                                <td colspan='7'>ไม่พบข้อมูล</td>\
+                                 </tr>");
+
+}else{
+ for (var i = 0; i < idata.length; i++) {
+     var strlink='';
+     if (idata[i].claimstatus=='OFFICER_SENDNEW'){
+        strlink="<a href='#' class='receive'>รับสินค้าเข้า</a>";
+     }else if(idata[i].claimstatus=='WAREHOUSE_RECEIVED'){
+        strlink="<a href='#' class='sendsup'>ส่งสินค้าไปSUP</a>";
+     }else if(idata[i].claimstatus=='WAREHOUSE_SEND'){
+        strlink="<a href='#' class='supreceive'>SUPรับสินค้าเคลม</a>";
+     }else if(idata[i].claimstatus=='SUPPLIER_RECEIVED'){
+        strlink="<a href='#' class='supreply'>SUPส่งสินค้าเคลม</a>";
+     }else if(idata[i].claimstatus=='SUPPLIER_REPLY'){
+        strlink="<a href='#' class='warehouse_SUP_receive'>โกดังรับสินค้าSUP</a>";
+     }else if(idata[i].claimstatus=='warehouse_RECEIVED_SUP'){
+        strlink="<a href='#' class='warehouse_REPLY'>โกดังส่งสินค้าเคลม</a>";
+     }else if(idata[i].claimstatus=='warehouse_CLOSE'){
+        strlink="<a href='#' class='warehouse_CLOSE'>บัญชี/โกดังปิดเคลมเรียบร้อย</a>";
+     }
+
+     
+   tbl.append("<tr>\
+                                 <td class='claimid'><input type='hidden' name='hd_id' id='hd_id' value='"+idata[i].id+"'>"+idata[i].claimbyname+"</td>\
+                                 <td>"+idata[i].claimbranch+ "</td>\
+                                 <td><a href='/claimstep/"+idata[i].id+"' target='_blank'>"+idata[i].product + "</a></td>\
+                                 <td>"+idata[i].qty + "</td>\
+                                 <td>"+moment(idata[i].claimdate).format("DD/MM/YYYY")+ "</td>\
+                                 <td>"+idata[i].claimstatusname + "</td>\
+                                 <td>"+strlink+"</td>\
+                                 </tr>");
+ }
+
+    }
+}
+
+
+function getdataforpopup(id,type){
+$('#hd_claimID').val(id);
+$.ajax({
+            url:  '../claimlistwh/getdataforpopup/'+id,
+            type: 'GET',
+            dataType: 'JSON',
+            data: JSON.stringify({}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    loadclaimdata(data,type);
+                }
+            }
+        );
+}
+
+function loadclaimdata(data,type)
+{
+
+ $('#hd_contactname').val(data[0].customer_contactname);
+ $('#hd_contactmobile').val(data[0].customer_contactmobile);   
+var productname=data[0].productname  + '... รหัสสินค้า:' + data[0].productproductcode;
+var productproperty='';
+var claimdetail='';
+var warehousedetail='';
+var reasonclaim='';
+var qty=0;
+productproperty='ประเภท:'+data[0].producttype;
+if (data[0].productbrand !='')
+{
+productproperty=productproperty+' ยี่ห้อ:' +data[0].productbrand;
+} 
+if (data[0].productseries !='')
+{
+productproperty=productproperty+' รุ่นสินค้า:'+data[0].productseries;
+} 
+if (data[0].productesize !='')
+{
+productproperty=productproperty+' ขนาด:' +data[0].productsize;
+} 
+if (data[0].productccode !='')
+{
+productproperty=productproperty+' ปรเทศผู้ผลิต:' +data[0].productccode;
+} 
+
+if (!(data[0].yearweek=== undefined || data[0].yearweek === null ))
+{
+productproperty=productproperty+' สัปดาห์/ปี:' +data[0].yearweek;
+} 
+
+
+
+
+if (type=='receive'){
+    claimdetail='พนักงานเจ้าของ:'+data[0].claimbyname +'   สาขา:'+data[0].claimbranch + '   วันที่ส่งเรื่อง:'+moment(data[0].claimdate).format("DD/MM/YYYY");                   
+    if (data[0].claimremark){
+        claimdetail=claimdetail+' หมายเหตุ'+data[0].claimremark;  
+        }
+    if (data[0].reasonclaim){
+        reasonclaim=reasonclaim+' '+data[0].reasonclaim;  
+        }
+        
+    qty=data[0].claimqty;
+
+    $('#lbl_product').text(productname);
+    $('#lbl_productproperty').text(productproperty);
+    $('#lbl_claimdetail').text(claimdetail);
+
+    $('#lbl_reasonclaim').text(reasonclaim);
+
+
+    $('#txt_qty').val(qty);
+    $('#hd_maxqty').val(qty);
+    $('#modalreceive').modal('show');
+}else if (type=='sendsup'){
+
+    warehousedetail='พนักงานรับของ:'+data[0].warehouse_receivebyname + ' วันที่รับ:'+moment(data[0].warehouse_receivedate).format("DD/MM/YYYY");                   
+    if (data[0].warehouse_remark){
+        warehousedetail=warehousedetail+' หมายเหตุ'+data[0].warehouse_remark;  
+        }
+    if (data[0].reasonclaim){
+        reasonclaim=reasonclaim+' '+data[0].reasonclaim;  
+        }
+    qty=data[0].warehouse_receiveqty;
+    $('#lbl_productSendSUP').text(productname);
+    $('#lbl_productpropertySendSUP').text(productproperty);
+    $('#lbl_warehousedetail').text(warehousedetail);
+    $('#txt_qtySendSUP').val(qty);
+
+        $('#lbl_SendSUPreasonclaim').text(reasonclaim);
+   
+
+    $('#hd_maxqty').val(qty);
+    $('#modalSendSUP').modal('show');
+}else if (type=='supreceive'){
+    warehousedetail='พนักงาน:'+data[0].warehouse_sendbyname + ' วันที่ส่งของ:'+moment(data[0].warehouse_senddate).format("DD/MM/YYYY");                   
+    if (data[0].warehouse_sendremark){
+        warehousedetail=warehousedetail+' หมายเหตุ'+data[0].warehouse_sendremark;  
+        }
+     if (data[0].reasonclaim){
+        reasonclaim=reasonclaim+' '+data[0].reasonclaim;  
+        }
+    qty=data[0].warehouse_sendqty;
+    $('#lbl_productsupreceive').text(productname);
+    $('#lbl_productpropertysupreceive').text(productproperty);
+    $('#lbl_warehousedetailsupreceive').text(warehousedetail);
+    $('#lbl_supreceive_supplier').text(data[0].warehouse_sendsupplier);
+    $('#txt_qtysupreceive').val(qty);
+    $('#hd_maxqty').val(qty);
+    $('#modalsupreceive').modal('show');
+ $('#lbl_supreceivereasonclaim').text(reasonclaim);
+   
+
+}else if (type=='supreply'){
+    warehousedetail='พนักงาน:'+data[0].supplier_receivebyname + ' วันที่ส่งของ:'+moment(data[0].supplier_receivedate).format("DD/MM/YYYY");                   
+    if (data[0].supplier_receiveremark){
+        warehousedetail=warehousedetail+' หมายเหตุ'+data[0].supplier_receiveremark;  
+        }
+        if (data[0].reasonclaim){
+        reasonclaim=reasonclaim+' '+data[0].reasonclaim;  
+        }
+    qty=data[0].supplier_receiveqty;
+    $('#lbl_productsupreply').text(productname);
+    $('#lbl_productpropertysupreply').text(productproperty);
+    $('#lbl_warehousedetailsupreply').text(warehousedetail);
+    $('#lbl_supreply_supplier').text(data[0].warehouse_sendsupplier);
+    $('#txt_qtysupreply').val(qty);
+    $('#hd_maxqty').val(qty);
+    $('#modalsupreply').modal('show');
+
+     $('#lbl_supreplyreasonclaim').text(reasonclaim);
+  
+}else if (type=='warehouse_SUP_receive'){
+    warehousedetail='พนักงาน:'+data[0].supplier_replybyname + ' วันที่supส่งของ:'+moment(data[0].supplier_replydate).format("DD/MM/YYYY");                   
+    qty=data[0].supplier_replyqty;
+    if (data[0].reasonclaim){
+        reasonclaim=reasonclaim+' '+data[0].reasonclaim;  
+        }
+    $('#lbl_productwarehouse_SUP_receive').text(productname);
+    $('#lbl_productpropertywarehouse_SUP_receive').text(productproperty);
+    $('#lbl_warehousedetailwarehouse_SUP_receive').text(warehousedetail);
+    $('#lbl_warehouse_SUP_receive_supplier').text(data[0].supplier_replyresult+ ' ' + data[0].supplier_resultremark);
+    $('#txt_qtywarehouse_SUP_receive').val(qty);
+    $('#hd_maxqty').val(qty);
+    $('#modalwarehouse_SUP_receive').modal('show');
+  $('#lbl_warehouse_SUP_receivereasonclaim').text(reasonclaim);
+  
+}else if (type=='warehouse_REPLY'){
+    warehousedetail='พนักงาน:'+data[0].warehouse_SUP_receivebyname + ' วันที่รับของ:'+moment(data[0].warehouse_SUP_receivedate).format("DD/MM/YYYY");                   
+    qty=data[0].warehouse_SUP_receiveqty;
+    if (data[0].warehouse_SUP_remark){
+        warehousedetail=warehousedetail+' หมายเหตุ'+data[0].warehouse_SUP_remark;  
+        }
+        if (data[0].reasonclaim){
+        reasonclaim=reasonclaim+' '+data[0].reasonclaim;  
+        }
+    
+    $('#lbl_productwarehouse_REPLY').text(productname);
+    $('#lbl_productpropertywarehouse_REPLY').text(productproperty);
+    $('#lbl_warehousedetailwarehouse_REPLY').text(warehousedetail);
+    $('#lbl_warehouse_REPLY_supplier').text(data[0].supplier_replyresult+ ' ' + data[0].supplier_resultremark);
+    $('#txt_qtywarehouse_REPLY').val(qty);
+    $('#hd_maxqty').val(qty);
+    $('#modalwarehouse_REPLY').modal('show');
+    $('#lbl_warehouse_REPLYreasonclaim').text(reasonclaim);
+    if (data[0].supplier_replyresult=="เคลมเป็น CN" || data[0].supplier_replyresult=="เคลมกลับไม่ตรงรุ่น")
+   {
+     $('#btn_warehouse_REPLY').val('บัญชี/โกดัง แจ้งผลการเคลมลูกค้าและปิดเคลม');
+     
+     $('#hd_claimclose').val(1);
+   }else{
+       $('#hd_claimclose').val(0);
+   }
+
+} else if (type==''){
+//warehouse_REPLY
+} 
+
+
+}
+
+function SMS(msg)
+{
+    var mobile='';
+    if ($('#hd_contactmobile').val() != '' && $('#hd_contactname').val() != '')
+    {
+        msg = 'การเคลมสินค้าของคุณ '+$('#hd_contactname').val()+' '+msg;
+        mobile=$('#hd_contactmobile').val();
+    var url = 'https://www.thaibulksms.com/sms_api.php?username=0880222084&password=509269&msisdn='+mobile+'&message='+msg+'&sender=NOTICE&force=premium';
+    //console.log(url);
+	$.ajax({
+            url:  url,
+            type: 'GET',
+            dataType: 'JSON',
+            async: true,
+            crossDomain: true,
+            //xhrFields: {
+            //withCredentials: true
+            //},
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert('ส่งข้อความไปยังลูกค้าแล้ว');
+                $('#hd_contactmobile').val('');
+                $('#hd_contactname').val('');
+                }
+            }
+        );
+    }else{
+        alert('ระบบไม่ส่งข้อความเนื่องจากไม่มีเบอร์ติดต่อที่ให้ไว้');
+
+    }
+    //alert(msg);
+}
+
+function receive(){
+        var canclaim=parseInt($('#hd_maxqty').val());
+        var qty=parseInt($('#txt_qty').val());
+         if (qty>0)
+         {
+            if (qty>canclaim)
+            {
+            alert('จำนวนสินค้าเกิน สามารถเคลมสูงสุดได้ '+canclaim+ ' ชิ้น');
+            return false;
+            }
+         }else{
+            alert('กรุณาใส่จำนวนสินค้า');
+            return false;
+         } 
+
+        var msg='สินค้ากำลังดำเนินการเคลม <a href=https://srrwheel.herokuapp.com/claimstep/'+$('#hd_claimID').val()+'>ดูรายละเอีดเพิ่มเติม</a>';
+        $.ajax({
+            url:  '/claimlistwh/receive',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({claimid:$('#hd_claimID').val(),qty:$('#txt_qty').val(),remark:$('#txt_remark').val()}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert('บันทึกเรียบร้อย');
+                    loaddata();
+                    $('#modalreceive').modal('hide');
+                    $('#lbl_product').text('');
+                    $('#lbl_productproperty').text('');
+                    $('#lbl_claimdetail').text('');
+                    $('#txt_qty').val('');
+                    $('#txt_remark').val('');
+                    $('#hd_claimID').val('');
+                    
+                    SMS(msg);
+                }
+            }
+        );
+
+}
+
+
+function SendSUP(){
+        var canclaim=parseInt($('#hd_maxqty').val());
+        var qty=parseInt($('#txt_qtySendSUP').val());
+         if (qty>0)
+         {
+            if (qty>canclaim)
+            {
+            alert('จำนวนสินค้าเกิน สามารถเคลมสูงสุดได้ '+canclaim+ ' ชิ้น');
+            return false;
+            }
+         }else{
+            alert('กรุณาใส่จำนวนสินค้า');
+            return false;
+         } 
+        $.ajax({
+            url:  '/claimlistwh/SendSUP',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({claimid:$('#hd_claimID').val(),qty:$('#txt_qtySendSUP').val(),remark:$('#txt_remarkSendSUP').val(),ddl_sup:$('#ddl_sup').val()}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert('บันทึกเรียบร้อย');
+                    loaddata();
+                    $('#modalSendSUP').modal('hide');
+                    $('#lbl_productSendSUP').text('');
+                    $('#lbl_productpropertySendSUP').text('');
+                    $('#txt_qtySendSUP').val('');
+                    $('#txt_remarkSendSUP').val('');
+                    $('#hd_claimID').val('');
+                }
+            }
+        );
+
+}
+
+
+function supreceive(){
+    var canclaim=parseInt($('#hd_maxqty').val());
+        var qty=parseInt($('#txt_qtysupreceive').val());
+         if (qty>0)
+         {
+            if (qty>canclaim)
+            {
+            alert('จำนวนสินค้าเกิน สามารถเคลมสูงสุดได้ '+canclaim+ ' ชิ้น');
+            return false;
+            }
+         }else{
+            alert('กรุณาใส่จำนวนสินค้า');
+            return false;
+         } 
+$.ajax({
+            url:  '/claimlistwh/supreceive',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({claimid:$('#hd_claimID').val(),qty:$('#txt_qtysupreceive').val(),remark:$('#txt_remarksupreceive').val()}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert('บันทึกเรียบร้อย');
+                    loaddata();
+                    $('#modalsupreceive').modal('hide');
+                    $('#lbl_productsupreceive').text('');
+                    $('#lbl_productpropertysupreceive').text('');
+                    $('#txt_qtysupreceive').val('');
+                    $('#txt_remarksupreceive').val('');
+                    $('#hd_claimID').val('');
+                }
+            }
+        );
+
+}
+
+function supreply(){
+    var canclaim=parseInt($('#hd_maxqty').val());
+        var qty=parseInt($('#txt_qtysupreply').val());
+         if (qty>0)
+         {
+            if (qty>canclaim)
+            {
+            alert('จำนวนสินค้าเกิน สามารถเคลมสูงสุดได้ '+canclaim+ ' ชิ้น');
+            return false;
+            }
+         }else{
+            alert('กรุณาใส่จำนวนสินค้า');
+            return false;
+         } 
+    var result='';
+    var msg='';
+    if ($('#ddl_claim').val()==1) {
+           result='เคลมได้';
+           msg='สินค้าสามารถเคลมได้..' +$('#txt_remarksupreply').val() +' <a href=https://srrwheel.herokuapp.com/claimstep/'+$('#hd_claimID').val()+'>ดูรายละเอีดเพิ่มเติม</a>';
+        }else if ($('#ddl_claim').val()==2) {
+            result='เคลมเป็น CN';
+            msg='สินค้าสามารถเคลมได้' +' <a href=https://srrwheel.herokuapp.com/claimstep/'+$('#hd_claimID').val()+'>ดูรายละเอีดเพิ่มเติม</a>';
+        }else if ($('#ddl_claim').val()==3) {
+            result='เคลมกลับไม่ตรงรุ่น';
+            msg='สินค้าสามารถเคลมได้' +' <a href=https://srrwheel.herokuapp.com/claimstep/'+$('#hd_claimID').val()+'>ดูรายละเอีดเพิ่มเติม</a>';
+        }else if ($('#ddl_claim').val()==4) {
+            result='เคลมไม่ได้';
+            msg='สินค้าไม่สามารถเคลมได้..' +$('#txt_remarksupreply').val() +' <a href=https://srrwheel.herokuapp.com/claimstep/'+$('#hd_claimID').val()+'>ดูรายละเอีดเพิ่มเติม</a>';
+        }else{
+             alert('กรุณาเลือกผลการเคลมก่อน');
+            return false;
+        }
+        //alert(result);
+        
+        $.ajax({
+            url:  '/claimlistwh/supreply',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({claimid:$('#hd_claimID').val(),qty:$('#txt_qtysupreply').val(),result:result,remark:$('#txt_remarksupreply').val()}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert('บันทึกเรียบร้อย');
+                    loaddata();
+                    $('#modalsupreply').modal('hide');
+                    $('#lbl_productsupreply').text('');
+                    $('#lbl_productpropertysupreply').text('');
+                    $('#txt_qtysupreply').val('');
+                    $('#txt_remarksupreply').val('');
+                    $('#hd_claimID').val('');          
+                    SMS(msg);
+                }
+            }
+        );
+        
+
+}
+
+function warehouse_SUP_receive(){
+    var canclaim=parseInt($('#hd_maxqty').val());
+        var qty=parseInt($('#txt_qtywarehouse_SUP_receive').val());
+         if (qty>0)
+         {
+            if (qty>canclaim)
+            {
+            alert('จำนวนสินค้าเกิน สามารถเคลมสูงสุดได้ '+canclaim+ ' ชิ้น');
+            return false;
+            }
+         }else{
+            alert('กรุณาใส่จำนวนสินค้า');
+            return false;
+         } 
+    var result='';
+    var msg='';
+    //Check ถ้าเคลมเป็น CN หรือ เปลี่ยนสินค้า จะไปให้ บช หรือ คลัง ปิด
+       
+        $.ajax({
+            url:  '/claimlistwh/warehouse_SUP_receive',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({claimid:$('#hd_claimID').val(),qty:$('#txt_qtywarehouse_SUP_receive').val(),remark:$('#txt_remarkwarehouse_SUP_receive').val()}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert('บันทึกเรียบร้อย');
+                    loaddata();
+                    $('#modalwarehouse_SUP_receive').modal('hide');
+                    $('#lbl_productwarehouse_SUP_receive').text('');
+                    $('#lbl_productpropertywarehouse_SUP_receive').text('');
+                    $('#txt_qtywarehouse_SUP_receive').val('');
+                    $('#txt_remarkwarehouse_SUP_receive').val('');
+                    $('#hd_claimID').val('');          
+                }
+            }
+        );
+}
+
+
+function warehouse_REPLY(){
+    var canclaim=parseInt($('#hd_maxqty').val());
+        var qty=parseInt($('#txt_qtywarehouse_REPLY').val());
+         if (qty>0)
+         {
+            if (qty>canclaim)
+            {
+            alert('จำนวนสินค้าเกิน สามารถเคลมสูงสุดได้ '+canclaim+ ' ชิ้น');
+            return false;
+            }
+         }else{
+            alert('กรุณาใส่จำนวนสินค้า');
+            return false;
+         } 
+    var result='';
+    var msg='';
+        $.ajax({
+            url:  '/claimlistwh/warehouse_REPLY',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({claimid:$('#hd_claimID').val(),qty:$('#txt_qtywarehouse_REPLY').val(),remark:$('#txt_remarkwarehouse_REPLY').val()}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert('บันทึกเรียบร้อย');
+                    loaddata();
+                    $('#modalwarehouse_REPLY').modal('hide');
+                    $('#lbl_productwarehouse_REPLY').text('');
+                    $('#lbl_productpropertywarehouse_REPLY').text('');
+                    $('#txt_qtywarehouse_REPLY').val('');
+                    $('#txt_remarkwarehouse_REPLY').val('');
+                    $('#hd_claimID').val('');          
+                }
+            }
+        );
+}
+
+function warehouse_CLOSE(){
+    var canclaim=parseInt($('#hd_maxqty').val());
+        var qty=parseInt($('#txt_qtywarehouse_REPLY').val());
+         if (qty>0)
+         {
+            if (qty>canclaim)
+            {
+            alert('จำนวนสินค้าเกิน สามารถเคลมสูงสุดได้ '+canclaim+ ' ชิ้น');
+            return false;
+            }
+         }else{
+            alert('กรุณาใส่จำนวนสินค้า');
+            return false;
+         } 
+    var result='';
+    var msg='';
+        $.ajax({
+            url:  '/claimlistwh/warehouse_CLOSE',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({claimid:$('#hd_claimID').val(),qty:$('#txt_qtywarehouse_REPLY').val(),remark:$('#txt_remarkwarehouse_REPLY').val()}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert('บันทึกเรียบร้อย');
+                    loaddata();
+                    $('#modalwarehouse_REPLY').modal('hide');
+                    $('#lbl_productwarehouse_REPLY').text('');
+                    $('#lbl_productpropertywarehouse_REPLY').text('');
+                    $('#txt_qtywarehouse_REPLY').val('');
+                    $('#txt_remarkwarehouse_REPLY').val('');
+                    $('#hd_claimID').val('');          
+                }
+            }
+        );
+}
+
+
+</script>
+<style>
+    </style>
+</head>
+<body>
+ 
+ <div id="wrapper">
+ <% include partials/nav %>
+  <div id="page-wrapper">
+<h2>รายการเคลมสินค้า</h2>
+            <div class="container-fluid">
+<input type="hidden" id="hd_claimID" name="hd_claimID" value="">
+<input type="hidden" id="hd_contactname" name="hd_contactname" value="">
+<input type="hidden" id="hd_contactmobile" name="hd_contactmobile" value="">
+<input type="hidden" id="hd_maxqty" name="hd_maxqty" value="0">
+<input type="hidden" id="hd_claimclose" name="hd_claimclose" value="0">
+<div class="row">
+<div class="col-md-12">
+        <div class="row">
+                <div class="col-lg-5">
+                        ค้นหาชื่อ/เบอร์ติดต่อ
+                </div>
+                <div class="col-lg-5">
+                        สาขา
+                </div>
+                 <div class="col-lg-2">
+                        
+                </div>
+        </div>
+            <div class="row">
+                <div class="col-lg-5">
+                       <div class="input-group">
+                            <input type="text" class="form-control" id="txt_search" name="txt_search"/> 
+                        </div>
+                </div>
+                 <div class="col-lg-5">
+                       <div class="input-group">
+                        <select id="ddl_branch" class="form-control"><option value="">--สาขา--</option></select>
+                        </div>
+                </div>
+               
+            </div> 
+        <div class="row">
+                <div class="col-lg-5">
+                        จากวันที่
+                </div>
+                <div class="col-lg-5">
+                        ถึงวันที่
+                </div>
+                 <div class="col-lg-2">
+                        
+                </div>
+        </div>
+            <div class="row">
+                <div class="col-lg-5">
+                       <div class="input-group date">
+                        <input type="text" class="form-control" name="txt_from" id="txt_from" required="required"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                        </div>
+                </div>
+                 <div class="col-lg-5">
+                       <div class="input-group date">
+                        <input type="text" class="form-control" name="txt_to" id="txt_to" required="required"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                        </div>
+                </div>
+                 <div class="col-lg-2">
+                       <div class="input-group">
+                        <input type="button" id="btn_search" class="btn btn-info" value="ค้นหา">
+                        </div>
+                </div>
+            </div> 
+</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+   <table class="table" id="tbl_claimlist" name="tbl_claimlist">
+   <thead><tr>
+   <td>พนักงาน</td>
+   <td>สาขา</td>
+   <td>สินค้าที่เคลม</td>
+   <td>จำนวน</td>
+   <td>วันที่ส่งสินค้าเคลม</td>
+   <td>สถานะล่าสุด</td>
+   <td></td>
+   </tr></thead>
+   <tbody></tbody>
+   </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+/*modal receive*/
+<div class="modal fade" id="modalreceive" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="min-width: 80%;max-width:95%; min-height: 40%;max-height:40%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">รายละเอียด</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="col-md-12 center">
+                        <h4  class="fab fa-cloudsmith">ข้อมูลสินค้าเคลม</h4>
+                            <div class="form-group" >
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">ชื่อสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10">
+                                        <label class="control-label" id='lbl_product'></label>
+                                    </div>  
+                                </div>
+
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label" >ลักษณะสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_productproperty'>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">สาเหตุที่ส่งเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_reasonclaim'>  </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">รายละเอียดผู้ส่งเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_claimdetail'>  </label>
+                                    </div>
+                                </div>
+                                 
+
+                                <div class="row form-inline">
+                                            <div class="col-lg-2">
+                                                <label class="control-label">จำนวนสินค้าที่ส่งเคลม</label>
+                                            </div>
+                                            <div class=" col-lg-10">
+                                                <input type="text" name="txt_qty" id="txt_qty" class="form-control" value="">
+                                                
+                                               
+                                            </div>  
+                                </div>
+                                <div class="row form-inline" style="margin-top:5px;">
+                                    <div class="col-lg-2">
+                                        <label class="control-label">หมายเหตุ</label>
+                                    </div>
+                                    <div class=" col-lg-10">
+                                        
+                                        <input type="text" name="txt_remark" style="width:100%" id="txt_remark" class="form-control" value="" placeholder="ระบุหมายเหตุ">
+                                       
+                                    </div>  
+                                </div>
+                                <div class="row form-inline">
+                                    <div class="col-lg-2">
+                                        
+                                    </div>
+                                    <div class=" col-lg-10">
+                                        <br>
+                                        <input type="button" name="btn_receive" class="btn btn-success" id="btn_receive" value="รับสินค้าเคลม">
+                                    </div>  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalSendSUP" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="min-width: 80%;max-width:95%; min-height: 40%;max-height:40%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">รายละเอียด</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="col-md-12 center">
+                        <h4  class="fab fa-cloudsmith">ข้อมูลสินค้าเคลม</h4>
+                            <div class="form-group" >
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">ชื่อสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10">
+                                        <label class="control-label" id='lbl_productSendSUP'></label>
+                                    </div>  
+                                </div>
+
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label" >ลักษณะสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_productpropertySendSUP'>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">สาเหตุที่ส่งเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_SendSUPreasonclaim'>  </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">รายละเอียดผู้ส่งเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_warehousedetail'>  </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">SUPPILER</label>
+                                    </div>
+                                    <div class="form-group  col-lg-4">
+                                        <select class="form-control" id="ddl_sup" name="ddl_sup">
+                                        <option value="">--เลือก supplier--</option>
+                                        <% for(var i=0; i<supplier.length; i++) {%>
+                                        <option value="<%=supplier[i].value%>"><%=supplier[i].value%></option>
+                                        <% } %>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row form-inline">
+                                            <div class="col-lg-2">
+                                                <label class="control-label">จำนวนสินค้าที่ส่งเคลม</label>
+                                            </div>
+                                            <div class=" col-lg-10">
+                                                <input type="text" name="txt_qtySendSUP" id="txt_qtySendSUP" class="form-control" value="">
+                                                <input type="text" name="txt_remarkSendSUP" id="txt_remarkSendSUP" class="form-control" value="" placeholder="ระบุหมายเหตุ">
+                                                <input type="button" name="btn_SendSUP" class="btn btn-success" id="btn_SendSUP" value="ส่งสินค้าเคลมไปSUP">
+                                            </div>  
+                                        </div>
+                                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="modalsupreceive" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="min-width: 80%;max-width:95%; min-height: 40%;max-height:40%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">รายละเอียด</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="col-md-12 center">
+                        <h4  class="fab fa-cloudsmith">ข้อมูลสินค้าเคลม</h4>
+                            <div class="form-group" >
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">ชื่อสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10">
+                                        <label class="control-label" id='lbl_productsupreceive'></label>
+                                    </div>  
+                                </div>
+
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label" >ลักษณะสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_productpropertysupreceive'>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">สาเหตุที่ส่งเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_supreceivereasonclaim'>  </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">รายละเอียดผู้ส่งsupplier</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_warehousedetailsupreceive'></label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">SUPPILER เจ้าของสินค้าเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-4">
+                                        <label class="control-label" id="lbl_supreceive_supplier"></label>
+                                    </div>
+                                </div>
+
+                                <div class="row form-inline">
+                                            <div class="col-lg-2">
+                                                <label class="control-label">จำนวนสินค้าที่ส่งเคลม</label>
+                                            </div>
+                                            <div class=" col-lg-10">
+                                                <input type="text" name="txt_qtysupreceive" id="txt_qtysupreceive" class="form-control" value="">
+                                                <input type="text" name="txt_remarksupreceive" id="txt_remarksupreceive" class="form-control" value="" placeholder="ระบุหมายเหตุ">
+                                                <input type="button" name="btn_supreceive" class="btn btn-success" id="btn_supreceive" value="SUPรับสินค้าเคลม">
+                                            </div>  
+                                        </div>
+                                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalsupreply" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="min-width: 80%;max-width:95%; min-height: 40%;max-height:40%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">รายละเอียด</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="col-md-12 center">
+                        <h4  class="fab fa-cloudsmith">ข้อมูลสินค้าเคลม</h4>
+                            <div class="form-group" >
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">ชื่อสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10">
+                                        <label class="control-label" id='lbl_productsupreply'></label>
+                                    </div>  
+                                </div>
+
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label" >ลักษณะสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_productpropertysupreply'>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">สาเหตุที่ส่งเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_supreplyreasonclaim'>  </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">รายละเอียดผู้ส่งsupplier</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_warehousedetailsupreply'></label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">SUPPILER เจ้าของสินค้าเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-4">
+                                        <label class="control-label" id="lbl_supreply_supplier"></label>
+                                    </div>
+                                </div>
+                                 <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">ผลการเคลม</label>
+                                    </div>
+                                   
+                                    <div class="form-group  col-lg-6">
+                                        <select id="ddl_claim" class="form-control" ><option>--เลือกผลการเคลม--</option>
+                                        <option value="1">เคลมได้ปกติ</option>
+                                        <option value="2">เคลมเป็น CN</option>
+                                        <option value="3">เคลมกลับไม่ตรงรุ่น</option>
+                                        <option value="4">เคลมไม่ได้</option>
+                                        </select>
+                                        <input type="text" name="txt_remarksupreply" id="txt_remarksupreply" width="450px;" class="form-control" value="" placeholder="ระบุหมายเหตุ">
+                                    </div>
+                                </div>
+
+                                <div class="row form-inline">
+                                            <div class="col-lg-2">
+                                                <label class="control-label">จำนวนสินค้าที่ส่งเคลม</label>
+                                            </div>
+                                            <div class=" col-lg-10">
+                                                <input type="text" name="txt_qtysupreply" id="txt_qtysupreply" class="form-control" value="">       
+                                                <input type="button" name="btn_supreply" class="btn btn-success" id="btn_supreply" value="SUPส่งสินค้าเคลม">
+                                            </div>  
+                                        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalwarehouse_SUP_receive" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="min-width: 80%;max-width:95%; min-height: 40%;max-height:40%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">รายละเอียด</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="col-md-12 center">
+                        <h4  class="fab fa-cloudsmith">ข้อมูลสินค้าเคลม</h4>
+                            <div class="form-group" >
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">ชื่อสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10">
+                                        <label class="control-label" id='lbl_productwarehouse_SUP_receive'></label>
+                                    </div>  
+                                </div>
+
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label" >ลักษณะสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_productpropertywarehouse_SUP_receive'>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">สาเหตุที่ส่งเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_warehouse_SUP_receivereasonclaim'>  </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">รายละเอียดผู้ส่งsupplier</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_warehousedetailwarehouse_SUP_receive'></label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">ผลการเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-4">
+                                        <label class="control-label" id="lbl_warehouse_SUP_receive_supplier"></label>
+                                    </div>
+                                </div>
+                                <div class="row form-inline">
+                                            <div class="col-lg-2">
+                                                <label class="control-label">จำนวนสินค้าที่ส่งเคลม</label>
+                                            </div>
+                                            <div class=" col-lg-10">
+                                                <input type="text" name="txt_qtywarehouse_SUP_receive" id="txt_qtywarehouse_SUP_receive" class="form-control" value="">    
+                                                <input type="text" name="txt_remarkwarehouse_SUP_receive" id="txt_remarkwarehouse_SUP_receive" width="450px;" class="form-control" value="" placeholder="ระบุหมายเหตุ">   
+                                                <input type="button" name="btn_warehouse_SUP_receive" class="btn btn-success" id="btn_warehouse_SUP_receive" value="โกดังรับสินค้าเคลม">
+                                            </div>  
+                                        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalwarehouse_REPLY" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="min-width: 80%;max-width:95%; min-height: 40%;max-height:40%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">รายละเอียด</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="col-md-12 center">
+                        <h4  class="fab fa-cloudsmith">ข้อมูลสินค้าเคลม</h4>
+                            <div class="form-group" >
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">ชื่อสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10">
+                                        <label class="control-label" id='lbl_productwarehouse_REPLY'></label>
+                                    </div>  
+                                </div>
+
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label" >ลักษณะสินค้า</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_productpropertywarehouse_REPLY'>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">สาเหตุที่ส่งเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_warehouse_REPLYreasonclaim'>  </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">รายละเอียดผู้รับสินค้าsupplier</label>
+                                    </div>
+                                    <div class="form-group  col-lg-10" >
+                                        <label class="control-label" id='lbl_warehousedetailwarehouse_REPLY'></label>
+                                    </div>
+                                </div>
+                                <div class="row">
+					                <div class="form-group  col-lg-2">
+                                        <label class="control-label">ผลการเคลม</label>
+                                    </div>
+                                    <div class="form-group  col-lg-4">
+                                        <label class="control-label" id="lbl_warehouse_REPLY_supplier"></label>
+                                    </div>
+                                </div>
+                                <div class="row form-inline">
+                                            <div class="col-lg-2">
+                                                <label class="control-label">จำนวนสินค้าที่ส่งเคลม</label>
+                                            </div>
+                                            <div class=" col-lg-10">
+                                                <input type="text" name="txt_qtywarehouse_REPLY" id="txt_qtywarehouse_REPLY" class="form-control" value="">    
+                                                <input type="text" name="txt_remarkwarehouse_REPLY" id="txt_remarkwarehouse_REPLY" width="450px;" class="form-control" value="" placeholder="ระบุหมายเหตุ">   
+                                                <input type="button" name="btn_warehouse_REPLY" class="btn btn-success" id="btn_warehouse_REPLY" value="โกดังส่งสินค้าเคลมไปยังผู้เคลม">
+                                            </div>  
+                                        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+
+
+<% include partials/script %>  
+  </body>
+</html>  
+
+
+

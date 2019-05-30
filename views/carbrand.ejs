@@ -1,0 +1,114 @@
+<% include partials/head %> 
+<script>
+$(document).ready(function () {
+
+$('#ddl_brand').on('change', function() {
+    Bindnewbrand();
+
+});
+	
+   function Bindnewbrand(){
+
+        $.ajax({
+            url:  'carbrand/searchbrand',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_brand:$('#ddl_brand').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblbrand tbody');
+                     tbl.empty();
+                     tbl.append("<tr>\
+                                 <td>ยี่ห้อรถ</td>\
+                                 <td></td>\
+                                 </tr>");
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].brand+"</td>\
+                                 <td><a href=/createcarbrand/"+data[i]._id+" >แก้ไข</a> <a href=/carbrand/delete/"+data[i]._id+" >ลบ</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+    }
+});
+</script>
+</head>
+<body>
+
+ <div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">ข้อมูลยี่ห้อรถ
+
+			
+                        </h1><a href="/createcarbrand">  &nbsp;+เพิ่มข้อมูลยี่ห้อรถ</a>
+
+                    </div>
+ <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->
+ <div class="row">
+                    <div class="col-md-6">
+                    <form action="/search">
+                    <select class="form-control" id="ddl_brand" name="ddl_brand">
+                    <option value="">--เลือกยี่ห้อรถ--</option>
+                    <% for(var i=0; i<brand.length; i++) {%>
+                    <option value="<%=brand[i]%>"><%=brand[i]%></option>
+                    <% } %>
+                    </select>
+                    </form>
+                    </div>
+ </div>
+
+ <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-hover table-striped" id="tblbrand">
+                            <tbody>
+<tr>
+<td>ยี่ห้อรถ</td>
+<td></td>
+</tr>
+
+			 <% if (CarData != null) { %>
+			 <% for(var i=0; i<CarData.length; i++) {%>
+                    <tr  valign="middle">
+                                    <td> <%=CarData[i].brand%>
+                                    </td>
+                                    <td><a href="/createcarbrand/<%=CarData[i].id%>" >แก้ไข</a> <a href="/carbrand/delete/<%=CarData[i].id%>" >ลบ</a></td>
+                                </tr>
+             <% } %>
+             <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+
+			 
+
+ </div>
+			</div>
+	         </div>
+            </div>
+            <!-- /.container-fluid -->
+
+
+	   
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+<% include partials/script %>  
+  </body>
+</html>  

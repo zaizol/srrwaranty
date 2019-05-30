@@ -1,0 +1,153 @@
+<% include partials/head %> 
+<script>
+$(document).ready(function () {
+Bindtype();
+Binddata();
+
+$('#ddl_type').on('change', function() {
+    Binddata();
+});
+
+
+	
+   function Bindtype(){
+
+        $.ajax({
+            url:  'master/gettype',
+            type: 'GET',
+            dataType: 'JSON',
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var ddl=$('#ddl_type');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกประเภท--</option>");
+                     var str_selected='';
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i]==$('#hd_type').val()){
+                            str_selected="selected";
+                        }
+                     ddl.append("<option value='"+data[i]+"' "+str_selected+" >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+    }
+
+    function Binddata(){
+
+        $.ajax({
+            url:  'master/getmaster',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_type').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblmaster tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].type+"</td>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>"+data[i].remark+"</td>\
+                                 <td>"+data[i].orders+"</td>\
+                                 <td><a href=/createmaster/"+data[i]._id+" >แก้ไข</a> &nbsp; <a href=/master/delete/"+data[i]._id+" >ลบ</a></td>\
+                                 </tr>");
+                    }
+                }
+            }
+        );
+    }
+    function addmaster(){
+        alert($('#txt_type').val());
+        $.ajax({
+            url:  'master/addmaster',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ type:$('#txt_type').val(),name:$('#txt_name').val(),remark:$('#txt_remark').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert('added');
+                //set HD
+                $('#hd_type').val($('#txt_type').val());
+                //And Bind type
+            }
+        }
+        );
+    }
+});
+</script>
+</head>
+<body>
+
+ <div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">ข้อมูลมาสเตอร์
+
+			
+                        </h1> 
+
+                    </div>
+ <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->
+
+<div class="row">
+ <div class="col-md-12">      
+<a href="/createmaster">+เพิ่มข้อมูล</a>
+</div>
+</div>
+ <div class="row">
+                    <div class="col-md-6">        
+                    <select class="form-control" id="ddl_type" name="ddl_type">
+                    <option value="">--เลือกประเภท--</option>
+                    </select>
+                    </div>
+ </div>
+
+ <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-hover table-striped" id="tblmaster">
+                        <thead>
+                        <tr>
+                        <td>ประเภท</td>
+                        <td>ค่า</td>
+                        <td>หมายเหตุ</td>
+                        <td>ลำดับ</td>
+                        </tr>
+                        </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+
+			 
+
+ </div>
+			</div>
+	         </div>
+            </div>
+            <!-- /.container-fluid -->
+
+
+	   
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+<% include partials/script %>  
+  </body>
+</html>  

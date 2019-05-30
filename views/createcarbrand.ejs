@@ -1,0 +1,57 @@
+<% include partials/head %> 
+<script>
+$(document).ready(function () {
+    
+});
+</script>
+</head>
+<body>
+
+ <div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">เพิ่มข้อมูลรุ่นรถ
+
+                        </h1>
+
+                    </div>
+ <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->
+ <form role="form" action="/createcarbrand<%= CarData ? "/"+CarData._id : "" %>" method="post" >
+ <div class="row">
+                    <div class="form-group  col-lg-6" id="brand_new">
+                        <label class="control-label">ยี่ห้อรถใหม่</label>
+			            <input type="text" class="form-control" placeholder="รุ่นรถ" name="txt_brand" id="txt_brand" value="<%= CarData ?  CarData.brand ? CarData.brand : "" :"" %>"  />
+                    </div>              
+ </div>
+ <div class="row">
+                   <div class="form-group  col-lg-12">
+                        <button class="btn btn-success btn-lg pull-right" type="submit">บันทึก</button>
+                    </div>
+ </div>
+ </form>
+			</div>
+	         </div>
+            </div>
+            <!-- /.container-fluid -->
+
+
+	   
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+<% include partials/script %>  
+  </body>
+</html>  

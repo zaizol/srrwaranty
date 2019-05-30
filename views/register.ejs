@@ -1,0 +1,199 @@
+<% include partials/head %> 
+<script>
+Date.prototype.addDays = function(days) {
+    this.setDate(this.getDate() + parseInt(days));
+    return this;
+};
+$(document).ready(function () {
+     $("#tbl_cars").on("click", ".delete-row", function () {
+      $(this).closest('tr').remove();
+    });
+      $("#btn_submit").click(function(){
+        var str='';
+        if(str != ''){
+            alert('โปรดตรวจสอบข้อมูล '+str + 'ให้ครบถ้วน');
+            return false;
+        }
+    });
+
+    $("#btn_addcar").click(function(){
+        var tbl=$("#tbl_cars tbody");
+        tbl.append("<tr>\
+                                 <td class='carbrand'>"+$("#ddl_carbrand").val()+"</td>\
+                                 <td class='carseries'>"+$("#txt_carseries").val()+"</td>\
+                                 <td class='licenseNo'>"+$("#txt_licenseNo").val()+"</td>\
+                                 <td class='mileage'>"+$("#txt_mileage").val()+"</td>\
+                                 <td class='caryear'>"+$("#txt_caryear").val()+"</td>\
+                                 <td class='delete-row'><a class=''>delete</a></td>\
+                                 </tr>");
+
+    });
+
+    $("#btn_addcustomer").click(function(){
+        var str='';
+        if ($("#name").val() =='')
+            {
+                str=str+'ชื่อ, ';
+            }
+            if ($("#lastname").val() =='')
+            {
+                str=str+'นามสกุล, ';
+            }
+            if ($("#mobile").val() =='')
+            {
+                str=str+'หมายเลขโทรศัพท์, ';
+            }
+        if(str != ''){       
+            alert('โปรดตรวจสอบข้อมูล '+str + 'ให้ครบถ้วน');
+            return false;
+        }
+        var arr=[];
+        $('#tbl_cars tbody tr').each(function(){
+            var carbrand='';
+            var carseries='';
+            var licenseNo='';
+            var mileage='';
+            var pcd='';
+            var offset='';
+            var wheelsize='';
+            carbrand=$(this).find('.carbrand')[0].innerHTML;
+            carseries=$(this).find('.carseries')[0].innerHTML;
+            licenseNo=$(this).find('.licenseNo')[0].innerHTML;
+            mileage=$(this).find('.mileage')[0].innerHTML;
+            caryear=$(this).find('.caryear')[0].innerHTML;
+            arr.push({'carbrand':carbrand,'carseries':carseries,'licenseNo':licenseNo,'mileage':mileage,'caryear':caryear});
+        });
+
+        $.ajax({
+            url:  '/register/create',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ name:$('#name').val(),lastname:$('#lastname').val(),mobile:$('#mobile').val(),facebook:$('#facebook').val(),lineID:$('#lineID').val(),cars:arr }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    window.location = data.redirect
+                }
+            }
+        );
+    });
+});
+
+
+</script>
+<style>
+    </style>
+</head>
+<body>
+ 
+ <div id="wrapper">
+ <% include partials/nav %>
+  <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+
+
+<div class="row">
+<div class="col-md-12">
+<form role="form" enctype="multipart/form-data" action="/register" method="post">
+    <div class="row setup-content" id="step-1">
+        <div class="col-xs-12">
+            <div class="col-md-12 center">
+                <h3>ข้อมูลลูกค้า</h3>
+                <div class="form-group  col-lg-6">
+                    <label class="control-label">ชื่อ<font color="red">**</font></label>
+                    <input type="text" required="required" class="form-control" placeholder="ชื่อ" name="name" id="name"  />
+                </div>
+                <div class="form-group  col-lg-6">
+                    <label class="control-label">นามสกุล<font color="red">**</font></label>
+                    <input type="text" class="form-control" placeholder="นามสกุล" name="lastname" id="lastname" />
+                </div>
+		        <div class="form-group  col-lg-6">
+                    <label class="control-label">โทรศัพท์<font color="red">**</font></label>
+                    <input type="text" required="required" class="form-control" placeholder="หมายเลขโทรศัพท์" name="mobile" id="mobile" />
+                </div>
+                <div class="form-group  col-lg-6">
+                    <label class="control-label">ไลน์ไอดี</label>
+                    <input type="text" class="form-control" placeholder="Line ID" name="lineID" id="lineID" />
+                </div>
+                 <div class="form-group  col-lg-6">
+                    <label class="control-label">เฟสบุค</label>
+                    <input type="text" class="form-control" placeholder="Facebook" name="facebook" id="facebook" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row setup-content" id="step-2">
+        <div class="col-xs-12">
+            <div class="col-md-12 center">
+                <h3>ข้อมูลรถยนต์</h3>
+                
+                <div class="form-group  col-lg-6">
+                    <label class="control-label">ยี่ห้อรถ</label>
+                    	<select class="form-control" id="ddl_carbrand" name="ddl_carbrand">
+						 <option value="">--เลือกยี่ห้อ--</option>
+                        <% if (brands!=null) { for(var i=0; i<brands.length; i++) {%>
+                        <option value="<%=brands[i].brand%>"><%=brands[i].brand%></option>
+                        <% }} %>
+                        </select>
+                </div>
+                 <div class="form-group  col-lg-6">
+                    <label class="control-label">รุ่นรถ</label>
+                     <input type="text" class="form-control" placeholder="รุ่นรถ" name="txt_carseries" id="txt_carseries"  />
+                </div>
+                <div class="form-group  col-lg-6">
+                    <label class="control-label">ทะเบียนรถ</label>
+                   <input type="text" class="form-control" placeholder="ทะเบียนรถ" name="txt_licenseNo" id="txt_licenseNo"  />
+                  
+                </div>
+                 <div class="form-group  col-lg-6">
+                    <label class="control-label">เลขไมล์</label>
+                   <input type="text" class="form-control" placeholder="ทะเบียนรถ" name="txt_mileage" id="txt_mileage"  />
+                </div>
+
+                <div class="form-group  col-lg-6">
+                    <label class="control-label">ปีรถ</label>
+                 <input type="text" class="form-control" placeholder="ปีรถ" name="txt_caryear" id="txt_caryear"  />
+                </div>
+               
+                <div>
+                <input type="button" class="btn btn-lg btn-primary" id="btn_addcar" name="btn_addcar" value="เพิ่มรถยนต์" />
+                </div>
+                <br>
+                <div class="form-group" >
+					<table id="tbl_cars" class="table">
+                    <thead>
+                    <tr>
+                    <td>ยี่ห้อรถ</td>
+                    <td>รุ่นรถ</td>
+                    <td>ทะเบียนรถ</td>
+                    <td>เลขไมล์</td>
+                    <td>ปีรถ</td>
+                    <td></td>
+                    </tr>
+                    <tbody></tbody>
+                    </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row setup-content" id="step-3">
+ <input type="button" class="btn btn-lg btn-primary btn-block" id="btn_addcustomer" name="btn_addcustomer" value="เพิ่มข้อมูลลูกค้า" />
+     </div>
+        </div>
+    </div>
+</form>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+<% include partials/script %>  
+  </body>
+</html>  
+

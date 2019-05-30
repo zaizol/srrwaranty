@@ -1,0 +1,69 @@
+<% include partials/head %> 
+<script>
+
+$(document).ready(function () {
+ var follow_date = new Date();
+ 			
+ $(function () {
+		$('.input-group.date').datetimepicker({
+			defaultDate:follow_date,
+      format: 'DD-MM-YYYY hh:mm',
+		});
+            });
+});
+</script>
+
+<style>
+
+</style>
+
+
+</head>
+<body>
+
+<div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+		                    <h1 class="page-header">ตั้งค่าผู้ใช้งาน
+                        </h1>
+                    </div>
+                </div>
+                <% if (msgpwd != null) { %><div class="alert-success"><%= msgpwd %></div> <% } %>
+                <div class="row">
+                    <div class="col-lg-12">
+		                    <h3 class="page-header">ข้อมูลผู้ใช้งาน
+                        </h1>
+                    </div>
+                </div>
+                 <div class="row">
+                    <div class="col-lg-12">
+                    <form action="/setup/setnewpassword" method="post">
+		                   Reset Password :
+                           <input type="password" class="" name="newpassword" id="newpassword" >
+                           <button type="submit" class="btn btn-default">Reset</button>
+                    </form>     
+                    </div>
+                   
+                </div>
+                 
+                
+               
+            </div>
+        </div>
+
+        
+        <!-- /#page-wrapper -->
+
+</div>
+    <!-- /#wrapper -->
+<% include partials/script %>  
+  </body>
+</html>  

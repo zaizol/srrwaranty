@@ -1,0 +1,119 @@
+
+
+
+<% include partials/head %> 
+<script>
+Date.prototype.addDays = function(days) {
+    this.setDate(this.getDate() + parseInt(days));
+    return this;
+};
+$(document).ready(function () {
+
+    
+     $("#btn_search").click(function(){
+         $.ajax({
+            url:  '/customerlist/loaddata',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {'search':$('#txt_search').val(),searchmobile:$('#txt_searchmobile').val()},
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 bind(data);
+                }
+            }
+        );
+
+    });
+      $("#btn_submit").click(function(){
+        var str='';
+        if(str != ''){
+            alert('โปรดตรวจสอบข้อมูล '+str + 'ให้ครบถ้วน');
+            return false;
+        }
+    });
+//
+        $.ajax({
+            url:  '/customerlist/loaddata',
+            type: 'GET',
+            dataType: 'JSON',
+            data: {'search':$('#txt_search').val(),searchmobile:$('#txt_searchmobile').val()},
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 bind(data);
+                }
+            }
+        );
+
+});
+function bind(data)
+{
+
+var idata=jQuery.parseJSON(JSON.stringify(data));
+var tbl=$('#tbl_cus tbody');
+                     tbl.empty();
+if (idata.length==0){
+ tbl.append("<tr>\
+                                <td colspan='6'>ไม่พบข้อมูล</td>\
+                                 </tr>");
+
+}else{
+ for (var i = 0; i < idata.length; i++) {
+   tbl.append("<tr>\
+                                <td>"+idata[i].fullname+"</td>\
+                                 <td>"+idata[i].mobile+ "</td>\
+                                 <td>"+idata[i].licenseNo + "</td>\
+                                 <td>"+moment(idata[i].lastservice).format("DD/MM/YYYY")+ "</td>\
+                                 <td><a href='/customerdetail/"+idata[i].id+"'>รายละเอียด</a></td>\
+                                 <td><a href='/waranty/"+idata[i].id+"'>รับประกันสินค้า</a></td>\
+                                 </tr>");
+ }
+
+}
+}
+
+
+</script>
+<style>
+    </style>
+</head>
+<body>
+ 
+ <div id="wrapper">
+ <% include partials/nav %>
+  <div id="page-wrapper">
+<h2>รายการลูกค้า</h2>
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+<a href="/register">+เพิ่มลูกค้าใหม่</a>
+
+<div class="row">
+<div class="col-md-12">
+   ค้นหา <input type="text" id="txt_search" placeholder="ทะเบียนรถ" name="txt_search"/> <input type="text" id="txt_searchmobile" placeholder="เบอร์โทร" name="txt_searchmobile"/> <input type="button" id="btn_search" name="btn_search" value="ค้นหา">
+</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+   <table class="table" id="tbl_cus" name="tbl_cus">
+   <thead><tr>
+   <td>ชื่อ - สกุล</td>
+   <td>เบอร์โทร</td>
+   <td>ทะเบียนรถ</td>
+   <td>วันที่เข้าบริการล่าสุด</td>
+   <td></td>
+   </tr></thead>
+   <tbody></tbody>
+   </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<% include partials/script %>  
+  </body>
+</html>  
+
+
+

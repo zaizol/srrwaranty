@@ -1,0 +1,573 @@
+<% include partials/head %> 
+<script>
+$(document).ready(function () {
+$('#div_row').hide();
+$('#div_row2').hide();
+$('#btn_showsearch').hide();
+$('#txt_mileage').hide();
+
+
+$('#ddl_brand').on('change', function() {
+    Get_series();
+    ClearDDL('ddl_size');
+});
+$('#ddl_series').on('change', function() {
+    Get_size(); 
+});
+
+
+$('#ddl_car').on('change', function() {
+    $('#txt_mileage').val('');
+    if ($('#ddl_car').val()!= '')
+    {
+        $('#btn_showsearch').show();
+        $('#txt_mileage').show();
+    }else{
+        $('#btn_showsearch').hide();
+        $('#txt_mileage').hide();
+    }
+});
+$('#ddl_producttype').on('change', function() {
+    ShowProductfield();
+    var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+
+    //Get Brand
+Get_brand();
+//Clear series and size
+ClearDDL('ddl_series');
+ClearDDL('ddl_size');
+});
+$('#btn_showsearch').on('click', function() {
+    $('#modalSearch').modal('show');
+});
+$("#tblproduct").on("click", ".delete-row", function () {
+      $(this).closest('tr').remove();
+    });
+$('#btn_search').on('click', function() {
+    CheckSearch();
+});
+$('#btn_clear').on('click', function() {
+   clearPopup();
+});
+$("#btn_insert").click(function(){
+        if ($("#ddl_car").val() =='')
+            {       
+            alert('โปรดเลือกรถที่เข้าใช้บริการ');
+            return false;
+            }
+
+        if ($("#txt_mileage").val() =='')
+            {       
+            alert('โปรดใส่เลขไมล์รถล่าสุด เพื่อเป็นข้อมูลประกอบการรับประกันเงื่อนไขพิเศษ');
+            return false;
+            }
+        var arr=[];
+        $('#tblproduct tbody tr').each(function(){
+            var product_id='';
+            var qty='';
+            var warantyconditionsselect='';
+            var months='';
+            var years='';
+            var yearweek='';
+            data=$(this).find('.qty').find("input");
+            dataselect=$(this).find('.waranty').find("select");
+            console.log(dataselect);
+            product_id=data[0].value;
+            qty=data[1].value;
+            days=data[2].value;
+            months=data[3].value;
+            years=data[4].value;
+            warantyconditions=data[5].value;
+            warantyconditionsselect=dataselect[0].value;
+            yearweek=data[6].value;
+            arr.push({'product_id':product_id,'qty':qty,'days':days,'months':months,'years':years,'warantyconditions':warantyconditions,'warantyconditionsselect':warantyconditionsselect,'yearweek':yearweek});
+        });
+
+        $.ajax({
+            url:  '../waranty/warantyproduct',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ cus_id:$('#hd_cusID').val(),car:$('#ddl_car').val(),mileage:$('#txt_mileage').val(),products:arr,ddl_branch:$('#ddl_branch').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    window.location = data.redirect
+                }
+            }
+        );
+    });
+});
+
+function clearPopup(){
+    $('#ddl_brand').val('');
+    $('#txt_name').val('');
+
+    ClearDDL('ddl_series');
+    ClearDDL('ddl_size');
+
+    var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+
+}
+function clearhidePopup(){
+ $('#modalSearch').modal('hide');
+    $('#ddl_brand').val('');
+    $('#txt_name').val('');
+
+    ClearDDL('ddl_series');
+    ClearDDL('ddl_size');
+
+
+    var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+
+}
+
+function addproduct(product_id)
+{
+    var ddl_con="<select><option value=''>--เลือกเงื่อนไขการรับประกัน--</option>";
+    //get WarantyCondition
+    $.ajax({
+            url:  '../waranty/Get_warantycondition',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify(),
+            async: false,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        ddl_con=ddl_con+"<option value='"+data[i].name+"'  >"+data[i].name+"</option>";
+                    }
+                }
+            }
+        );
+        ddl_con=ddl_con+"</select>";
+        console.log(ddl_con);
+ $.ajax({
+            url:  '../waranty/addproduct',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ product_id:product_id }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 var tbl=$('#tblproduct tbody');
+                     //tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td class='qty'><input type='hidden' name='hd_id' id='hd_id' value='"+data[i].id+"'/><input type='text' name='txt_qty' id='txt_qty' value='1'><input type='hidden' name='hd_day' id='hd_day' value='"+data[i].days+"'/><input type='hidden' name='hd_month' id='hd_month' value='"+data[i].months+"'/><input type='hidden' name='hd_year' id='hd_year' value='"+data[i].years+"'/><input type='hidden' name='hd_warantyconditions' id='hd_warantyconditions' value='"+data[i].warantyconditions+"'/><input type='text' name='txt_yearweek' id='txt_yearweek' value='' placeholder='สัปดาห์/ปี'></td>\
+                                 <td class='waranty'>"+ddl_con+"</td>\
+                                 <td>"+moment(data[i].expired).format("DD/MM/YYYY")+"</td>\
+                                 <td class='delete-row'><a class=''  style='cursor: pointer;'>ลบรายการ</a></td>\
+                                 </tr>");
+                    }
+                    clearhidePopup();
+                }
+            }
+        );
+}
+
+function ShowProductfield()
+{
+    $('#div_row').show();
+    $('#div_row2').show();
+    /*if ($('#ddl_producttype').val()=='wheel')
+    {
+        
+    }else if ($('#ddl_producttype').val()=='tire')
+    {
+        $('#div_Tirerow').show();
+        $('#div_Tirerow2').show();
+        $('#div_Wheelrow1').hide();
+        $('#div_Wheelrow2').hide();
+        $('#div_Wheelrow3').hide();
+    } else if ($('#ddl_producttype').val()=='Accessories')
+    {
+        $('#div_Tirerow').hide();
+        $('#div_Tirerow2').hide();
+        $('#div_Wheelrow1').hide();
+        $('#div_Wheelrow2').hide();
+        $('#div_Wheelrow3').hide();
+    } else{
+        $('#div_Tirerow').hide();
+        $('#div_Tirerow2').hide();
+        $('#div_Wheelrow1').hide();
+        $('#div_Wheelrow2').hide();
+        $('#div_Wheelrow3').hide();
+    }*/
+
+}
+
+function Get_brand()
+{
+$.ajax({
+            url:  '../waranty/Get_brand',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var ddl=$('#ddl_brand');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกยี่ห้อ--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                     ddl.append("<option value='"+data[i]+"'  >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+
+}
+
+function Get_series()
+{
+$.ajax({
+            url:  '../waranty/Get_series',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),brand:$('#ddl_brand').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var ddl=$('#ddl_series');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกรุ่นสินค้า--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                     ddl.append("<option value='"+data[i]+"'  >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+
+}
+
+function Get_size()
+{
+$.ajax({
+            url:  '../waranty/Get_size',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),brand:$('#ddl_brand').val(),series:$('#ddl_series').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var ddl=$('#ddl_size');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกขนาด--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                     ddl.append("<option value='"+data[i]+"'  >"+data[i]+"</option>");
+                    }
+                }
+            }
+        );
+    
+}
+
+
+
+function ClearDDL(Type){
+    if (Type=='ddl_series')
+    {
+        var ddl=$('#ddl_series');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกรุ่นสินค้า--</option>");
+
+    }else if (Type=='ddl_size')
+    {
+        var ddl=$('#ddl_size');
+                     ddl.empty();
+                     ddl.append("<option value=''>--เลือกขนาด--</option>");
+
+    }
+
+}
+
+
+function CheckSearch(){
+    if ($('#ddl_producttype').val()=='')
+    {
+        search();
+    }else{
+        if ($('#ddl_brand').val()!='')
+        {
+            if ($('#ddl_series').val()!='')
+            {
+                if ($('#ddl_size').val()!='')
+                {
+                    searchsize();
+                }else{
+                    searchseries();
+                }
+            }else{
+            searchbrand();
+            }
+        }else{
+        searchtype();
+        }
+    }
+}
+
+function bind(data){
+
+    var tbl=$('#tblproducts tbody');
+                     tbl.empty();
+                    for (var i = 0; i < data.length; i++) {
+                     tbl.append("<tr>\
+                                 <td>"+data[i].name+"</td>\
+                                 <td>ระยะเวลารับประกัน:"+data[i].days+' วัน '+data[i].months+' เดือน '+data[i].years+' ปี'+" ("+data[i].warantyconditions+")</td>\
+                                 <td><a onclick=addproduct('"+data[i].id+"');  style='cursor: pointer;' >เพิ่มสินค้า</a></td>\
+                                 </tr>");
+                    }
+}
+
+function search(){
+        $.ajax({
+            url:  '../waranty/search',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ txt_name:$('#txt_name').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 bind(data);
+                }
+            }
+        );
+}
+
+function searchtype(){
+        $.ajax({
+            url:  '../waranty/searchtype',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 bind(data);
+                }
+            }
+        );
+}
+
+function searchbrand(){
+        $.ajax({
+            url:  '../waranty/searchbrand',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_brand:$('#ddl_brand').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                bind(data);
+                }
+            }
+        );
+}
+
+function searchseries(){
+        $.ajax({
+            url:  '../waranty/searchseries',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_brand:$('#ddl_brand').val(),ddl_series:$('#ddl_series').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 bind(data);
+                }
+            }
+        );
+}
+
+function searchsize(){
+        $.ajax({
+            url:  '../waranty/searchsize',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ ddl_type:$('#ddl_producttype').val(),txt_name:$('#txt_name').val(),ddl_brand:$('#ddl_brand').val(),ddl_series:$('#ddl_series').val(),ddl_size:$('#ddl_size').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                 bind(data);
+                }
+            }
+        );
+}
+
+
+</script>
+</head>
+<body>
+
+ <div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">เพิ่มการรับประกันสินค้า
+
+			
+                        </h1> 
+
+                    </div>
+ <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                 <div class="col-md-6"> 
+                       <label class="control-label">ชื่อ-นามสกุล:<%=customer ? customer.customerInfo.name : ""%> <%=customer ? customer.customerInfo.lastname: ""%></label>
+                 </div>
+                 <div class="col-md-6"> 
+                       <label class="control-label">โทรศัพท์:<%=customer ? customer.customerInfo.mobile: ""%></label>
+                 </div>
+                 </br>
+                 <input type="hidden" name="hd_cusID" id="hd_cusID" value="<%=customer ? customer._id:""%>"/>
+                </div>
+<div class="row">
+<div class="col-md-4"> 
+ <select class="form-control" id="ddl_car" name="ddl_car">
+                    <option value="">--เลือกรถที่เข้ารับบริการ--</option>
+                    <% if (cars){ for(var i=0; i<cars.length; i++) { %>
+                        <option value="<%=cars[i]._id%>"><%=cars[i].carInfo.licenseNo%></option>
+                        <% }} %>
+                    </select>             
+</div>
+
+<div class="col-md-2">
+ <input type="text" class="form-control" id="txt_mileage" name="txt_mileage" value="" placeholder="เลขไมล์ล่าสุด" />
+</div>
+<div class="col-md-4"> 
+ <select class="form-control" id="ddl_branch" name="ddl_branch">
+                    <option value="">--เลือกสาขาที่เข้ารับบริการ--</option>
+                    <% if (branchs){ for(var i=0; i<branchs.length; i++) { %>
+                    
+                        <option value="<%=branchs[i]._id%>" <%= (userbranch==branchs[i]._id) ? "selected" : "" %>><%=branchs[i].BranchInfo.name%></option>
+                        <% }} %>
+                    </select>             
+</div>
+</div>  
+<div class="row">
+<div class="col-md-12 from-group">
+<h3>รายการสินค้า <input type="button" class="btn btn-lg btn-success" id="btn_showsearch" name="btn_showsearch" value="ค้นหาและเพิ่ม"/>
+</h3></div>
+ <div class="col-md-12">
+  <table class="table table-bordered" id="tblproduct">
+                        <thead>
+                        <tr>
+                        <td>รายละเอียดสินค้า</td>
+                        <td>จำนวนสินค้า</td>
+                        <td>เงื่อนไขการรับประกัน(ถ้ามี)</td>
+                        <td>ระยะเวลารับประกัน</td>
+                        <td></td>
+                        </tr>
+                        </thead>
+                            <tbody>
+                            </tbody>
+  </table>
+</div>
+ </div>  
+ <div class="row">
+<input type="button" class="btn btn-lg btn-primary" id="btn_insert" name="btn_insert" value="บันทึกข้อมูล"/>
+
+</div>            
+			</div>
+	         </div>
+            </div>
+            <!-- /.container-fluid -->
+
+
+	   
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+
+/*popup search item*/
+<div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="min-width: 80%;max-width:95%; min-height: 40%;max-height:40%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">ค้นหาสินค้า</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">        
+                    <select class="form-control" id="ddl_producttype" name="ddl_producttype">
+                    <option value="">--เลือกประเภทสินค้า--</option>
+                    <% for(var i=0; i<producttype.length; i++) { %>
+                    <option value="<%=producttype[i].value%>" ><%=producttype[i].value%></option>
+                    <% } %>
+                    </select>
+                    </div>
+                    <div class="col-md-6">        
+                    <input type="text" id="txt_name" class="form-control" name="txt_name" value="" placeholder="ชื่อสินค้า/รหัสสินค้า" />
+                    </div>
+                    <div class="col-md-2"> 
+                    <input type="button" id="btn_search" name="btn_search" value="ค้นหา"/>
+                    <input type="button" id="btn_clear" name="btn_clear" value="ลบการค้นหา"/>
+                    </div>
+
+</div>
+
+<div class="row" id="div_row">
+<div class="form-group col-lg-3">
+<label class="control-label">ยี่ห้อ</label>
+  <select class="form-control" id="ddl_brand" name="ddl_brand">
+                        <option value="">--เลือกยี่ห้อ--</option>
+</select>
+</div>
+<div class="form-group col-lg-3">
+<label class="control-label">รุ่นสินค้า</label>
+  <select class="form-control" id="ddl_series" name="ddl_series">
+                        <option value="">--เลือกรุ่นสินค้า--</option>
+</select>
+</div>
+
+<div class="form-group col-lg-3">
+<label class="control-label">ขนาด</label>
+  <select class="form-control" id="ddl_size" name="ddl_size">
+                        <option value="">--เลือกขนาด--</option>
+</select>
+</div>
+<div class="form-group col-lg-3">
+
+</div>
+</div>
+
+</div>
+                <div class="row">
+                    <div class="table-responsive">
+                        <div class="col-md-12 col-xd-12 col-lg-12">
+                        <table class="table table-hover table-striped" id="tblproducts">             
+                            <tbody>
+                            </tbody>
+                        </table>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<% include partials/script %>  
+  </body>
+</html>  

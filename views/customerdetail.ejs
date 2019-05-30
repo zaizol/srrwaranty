@@ -1,0 +1,195 @@
+<% include partials/head %> 
+<script>
+Date.prototype.addDays = function(days) {
+    this.setDate(this.getDate() + parseInt(days));
+    return this;
+};
+$(document).ready(function () {
+    loadcar();
+    loadservicehis();
+    $("#tbl_cars").on("click", ".delete-row", function () {
+      $(this).closest('tr').remove();
+    });
+
+    $("#btn_addcustomer").click(function(){
+       
+    });
+});
+function loadcar()
+{
+ $.ajax({
+            url:  '/customerdetail/loadcar/'+$('#hd_id').val(),
+            type: 'GET',
+            dataType: 'JSON',
+            data: JSON.stringify({}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var idata=data;
+                    var tbl=$("#tbl_cars tbody");
+                    if (idata.length==0){
+                    /*tbl.append("<tr>\
+                                <td colspan='8'>ไม่พบข้อมูล</td>\
+                                 </tr>");*/
+
+                    }else{
+                        for (var i = 0; i < idata.length; i++) {
+                        tbl.append("<tr>\
+                                 <td class='carbrand'>"+idata[i].brand+"</td>\
+                                 <td class='carseries'>"+idata[i].series+"</td>\
+                                 <td class='licenseNo'>"+idata[i].licenseNo+"</td>\
+                                 <td class='mileage'>"+idata[i].mileage+"</td>\
+                                 <td class='caryear'>"+idata[i].caryear+"</td>\
+                                 </tr>");
+                        }
+                    
+                    }
+                }
+            }
+        );
+
+}
+
+function loadservicehis()
+{
+ $.ajax({
+            url:  '/customerdetail/loadservicehis/'+$('#hd_id').val(),
+            type: 'GET',
+            dataType: 'JSON',
+            data: JSON.stringify({}),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    var idata=data;
+                    var tbl=$("#tbl_servicehis tbody");
+                    if (idata.length==0){
+                    tbl.append("<tr>\
+                                <td colspan='7'>ไม่พบข้อมูล</td>\
+                                 </tr>");
+
+                    }else{
+                        var dnow=new Date;
+                        var strwarranty='';
+                        var yearweek='';
+                        for (var i = 0; i < idata.length; i++) {
+                            if (moment(idata[i].eow)>=moment(dnow))
+                            {
+                                strwarranty="<a href='/claimproduct/"+idata[i].JoblistjID+"'><i class='fas fa-wrench'></i></a>";
+                            }else{
+                                strwarranty="expired";
+                            }
+                        if (!(idata[i].yearweek=== undefined || idata[i].yearweek === null ))
+                        {
+                            yearweek="("+idata[i].yearweek+")";
+                        }else{
+                            yearweek='';
+                        }
+
+                        tbl.append("<tr>\
+                                 <td>"+moment(idata[i].servicedate).format("DD/MM/YYYY")+"</td>\
+                                 <td>"+idata[i].branch+"</td>\
+                                 <td>"+idata[i].cardetail+' / '+idata[i].licenseNo+ ' -'+idata[i].mileage+"Km.</td>\
+                                 <td>"+idata[i].product+yearweek+"</td>\
+                                 <td>"+idata[i].qty+"</td>\
+                                 <td>"+moment(idata[i].eow).format("DD/MM/YYYY")+" / ("+idata[i].warantyconditions+")</td>\
+                                 <td>"+strwarranty+"</td>\
+                                 </tr>");
+                        }
+                    
+                    }
+                }
+            }
+        );
+
+}
+
+</script>
+<style>
+    </style>
+</head>
+<body>
+ 
+ <div id="wrapper">
+ <% include partials/nav %>
+  <div id="page-wrapper">
+
+    <div class="container-fluid">
+
+                <!-- Page Heading -->
+
+
+<div class="row">
+    <div class="col-md-12">
+        <form role="form" enctype="multipart/form-data" action="/customerdetail" method="post">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="col-md-12 center">
+                        <h3 class="fas fa-id-card-alt fa-2x">ข้อมูลลูกค้า</h3>
+                        <input type="hidden" id="hd_id" name="hd_id" value="<%=customer._id%>"/>
+                        <div class="form-group  col-lg-12">
+                            <label class="control-label">
+                            <i class="fas fa-user">:<%=customer.customerInfo.name%>&nbsp;<%=customer.customerInfo.lastname%></i>&nbsp;
+                            <i class="fab fa-facebook-square">:<%=customer.customerInfo.facebook%></i>&nbsp;
+                            <i class="fab fa-line">:<%=customer.customerInfo.lineID%></i>&nbsp;
+                            <i class="fas fa-mobile-alt">:<%=customer.customerInfo.mobile%></i>&nbsp;&nbsp;
+                            
+                            <i class="far fa-edit">แก้ไข</i></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="col-md-12 center">
+                        <h3  class="fas fa-car fa-2x">ข้อมูลรถยนต์</h3>
+                        <div class="form-group" >
+					        <table id="tbl_cars" class="table">
+                            <thead>
+                            <tr>
+                            <td>ยี่ห้อรถ</td>
+                            <td>รุ่นรถ</td>
+                            <td>ทะเบียนรถ</td>
+                            <td>เลขไมล์</td>
+                            <td>ปีรถ</td>
+                            </tr>
+                            <tbody></tbody>
+                            </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="col-md-12 center">
+                        <h3  class="fas fa-car fa-2x">ประวัติการเข้ารับบริการ</h3>
+                        <div class="form-group" >
+					        <table id="tbl_servicehis" class="table">
+                            <thead>
+                            <tr>
+                            <td>วันที่เข้าใช้บริการ</td>
+                            <td>สาขา</td>
+                            <td>รถที่เข้าใช้บริการ</td>
+                            <td>สินค้า</td>
+                            <td>จำนวน</td>
+                            <td>วันหมดอายุการรับประกัน</td>
+                            <td></td>
+                            </tr>
+                            <tbody></tbody>
+                            </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+        </div>
+    </div>
+</div>
+<% include partials/script %>  
+  </body>
+</html>  
+
