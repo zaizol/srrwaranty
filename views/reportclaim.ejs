@@ -1,0 +1,263 @@
+<% include partials/head %> 
+<script>
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+$(document).ready(function () {
+ var follow_date = new Date();
+ 			
+ $(function () {
+		$('.input-group.date').datetimepicker({
+			defaultDate:follow_date,
+      format: 'DD/MM/YYYY',
+		});
+            });
+//SET First Date to query
+var firstDay = moment().startOf('month').format('DD/MM/YYYY');
+$('#txt_from').val(firstDay);
+$('#txt_to').val(moment().format('DD/MM/YYYY'));
+
+
+//Set Query value
+var branch = getParameterByName('id');
+var txt_from=getParameterByName('txt_from');
+var txt_to=getParameterByName('txt_to');
+var type = getParameterByName('type');
+$('#txt_from').val(txt_from);
+$('#txt_to').val(txt_to);
+$('#hd_branch').val(branch);
+$('#hd_type').val(type);
+
+            getdata();
+            $('#btn_search').click(function(){   
+                 getdata();   
+            });
+
+});
+
+function getdata(){
+$.ajax({
+    url: '/reportclaim/load',
+    async:true,
+    data:{branch:$('#ddl_branch').val(),type:$('#hd_type').val(),txt_from: $('#txt_from').val(),txt_to: $('#txt_to').val()},
+    error: function() {
+      $('#info').html('<p>An error has occurred</p>');
+    },
+    success: function(data) {
+       bindtbl(data);
+    },
+    type: 'GET'
+    });
+
+}
+
+function bindtbl(data){
+var idata=JSON.parse(data);
+var tbl=$('#tbl_report tbody');
+tbl.empty();
+console.log(idata);
+if (idata.length==0){
+ tbl.append("<tr>\
+                                <td colspan='3'>ไม่พบข้อมูล</td>\
+                                 </tr>");
+
+}else{
+    var view="";
+    for (var i = 0; i < idata.length; i++) {
+        var cus='';
+        var pro='';
+            if(idata[i].customer_contactname != '')
+            {
+                cus=cus+idata[i].customer_contactname+' ';
+            }
+            if(idata[i].customer_contactmobile != '')
+            {
+                cus=' '+cus+idata[i].customer_contactmobile+' ';
+            }
+            if(idata[i].qty != '')
+            {
+                pro=' '+pro+idata[i].qty+' ';
+            }
+            var status='';
+
+            if (idata[i].claimstatus=='OFFICER_SENDNEW'){
+        status="เจ้าหน้าที่รับสินค้าเคลม";
+     }else if(idata[i].claimstatus=='WAREHOUSE_RECEIVED'){
+        status="กำลังดำเนินการ";
+     }else if(idata[i].claimstatus=='WAREHOUSE_SEND'){
+        status="กำลังดำเนินการ";
+     }else if(idata[i].claimstatus=='SUPPLIER_RECEIVED'){
+        status="สินค้าถึงผู้ผลิตแล้ว";
+     }else if(idata[i].claimstatus=='SUPPLIER_REPLY'){
+        status="แจ้งผลการเคลม";
+     }else if(idata[i].claimstatus=='warehouse_RECEIVED_SUP'){
+        status="กำลังดำเนินการ";
+     }else if(idata[i].claimstatus=='warehouse_REPLY'){
+        status="กำลังดำเนินการ";
+     }else if(idata[i].claimstatus=='OFFICER_RECEIVED'){
+        status="กำลังดำเนินการ";
+     }else if(idata[i].claimstatus=='OFFICER_APPOINTMENT'){
+        status="นัดรับสินค้าเคลม";
+     }else if(idata[i].claimstatus=='FINISH'){
+        status="ปิดการเคลม";
+     }
+
+
+     /*if (idata[i].status=='OFFICER_SENDNEW'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-danger'>เจ้าหน้าที่รับสินค้าเคลม</span></a>";
+     }else if(idata[i].status=='WAREHOUSE_RECEIVED'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>กำลังดำเนินการ</span></a>";
+     }else if(idata[i].status=='WAREHOUSE_SEND'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>กำลังดำเนินการ</span></a>";
+     }else if(idata[i].status=='SUPPLIER_RECEIVED'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>สินค้าถึงผู้ผลิตแล้ว</span></a>";
+     }else if(idata[i].status=='SUPPLIER_REPLY'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-info'>แจ้งผลการเคลม</span></a>";
+     }else if(idata[i].status=='warehouse_RECEIVED_SUP'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>กำลังดำเนินการ</span></a>";
+     }else if(idata[i].status=='warehouse_REPLY'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>กำลังดำเนินการ</span></a>";
+     }else if(idata[i].status=='OFFICER_RECEIVED'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>กำลังดำเนินการ</span></a>";
+     }else if(idata[i].status=='OFFICER_APPOINTMENT'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-warning'>นัดรับสินค้าเคลม</span></a>";
+     }else if(idata[i].status=='FINISH'){
+        status="<a href='../claimstep/"+idata[i].claimid+"' target='_blank'><span class='label label-success'>ปิดการเคลม</span></a>";
+     }*/
+
+        tbl.append("<tr>\
+                                 <td>"+cus+"</td>\
+                                 <td>"+moment(idata[i].claimdate).format("DD/MM/YYYY")+"</td>\
+                                 <td>"+idata[i].claimbranch+"</td>\
+                                 <td>"+idata[i].claimbyname+"</td>\
+                                 <td>"+pro+"</td>\
+                                 <td>"+idata[i].reasonclaim+"</td>\
+                                 <td>"+status+"</td>\
+                                 </tr>");  
+    }
+}
+}
+
+
+
+</script>
+
+<style>
+
+</style>
+
+
+</head>
+<body>
+
+<div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+		                    <h1 class="page-header">รายงานการเคลมสินค้า
+                        </h1>
+                    </div>
+                </div>
+                  <div class="row">
+                    <div class="col-lg-5">
+		                    จากวันที่<input type="hidden" id="hd_branch" value=""><input type="hidden" id="hd_type" value="">
+                    </div>
+                    <div class="col-lg-5">
+		                    ถึงวันที่
+                    </div>
+                     <div class="col-lg-2">
+		                    
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-5">
+		                   <div class="input-group date">
+				            <input type="text" class="form-control" name="txt_from" id="txt_from" required="required"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+				            </div>
+                    </div>
+                     <div class="col-lg-5">
+		                   <div class="input-group date">
+				            <input type="text" class="form-control" name="txt_to" id="txt_to" required="required"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+				            </div>
+                    </div>
+                     <div class="col-lg-2">
+		                 
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-5">
+		                  สาขา
+                    </div>
+                    <div class="col-lg-5">
+		                   
+                    </div>
+                     <div class="col-lg-2">
+                       
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-5">
+                          <select id="ddl_branch" name="ddl_branch" class="form-control">
+                                <option value="">--เลือกสาขา--</option>
+                                <% if (branchs!=null) { for(var i=0; i<branchs.length; i++) {%>
+                                <option value="<%=branchs[i].BranchInfo.name%>"><%=branchs[i].BranchInfo.name%></option>
+                                <% }} %>
+                        </select>
+                    </div>
+                    <div class="col-lg-5">
+		                   
+                    </div>
+                     <div class="col-lg-2">
+                        <div class="input-group">
+				            <input type="button" id="btn_search" class="btn btn-info" value="ค้นหา">
+				            </div>  
+                    </div>
+                </div>
+
+                 <div class="row">
+                    <div class="col-lg-12">
+                        <table id="tbl_report" class="table">
+                        <thead>
+                        <tr>
+                        <td>ชื่อ-สกุล เบอร์โทร</td>
+                        <td>วันที่เคลม</td>
+                        <td>สาขาที่เคลม</td>
+                        <td>พนักงานรับเคลม</td>
+                        <td>รายละเอียดการเคลม</td>
+                        <td>หมายเหตุ</td>
+                        <td>สถานะล่าสุด</td>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                 
+                
+               
+            </div>
+        </div>
+
+        
+        <!-- /#page-wrapper -->
+
+</div>
+    <!-- /#wrapper -->
+<% include partials/script %>  
+  </body>
+</html>  
