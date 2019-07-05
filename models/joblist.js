@@ -11,6 +11,13 @@ var joblistSchema = mongoose.Schema({
     warantyconditionsselect: { type: String, trim: true },
     isclaim: { type: Number },
     claimstatus: { type: String, trim: true },
+
+    customername: { type: String, trim: true },
+    customercontact: { type: String, trim: true },
+    customercar: { type: String, trim: true },
+    branchname: { type: String, trim: true },
+    salename: { type: String, trim: true },
+
 }, { timestamps: true });
 
 joblistSchema.virtual('id').get(function() {

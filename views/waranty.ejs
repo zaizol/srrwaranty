@@ -88,7 +88,7 @@ $("#btn_insert").click(function(){
             url:  '../waranty/warantyproduct',
             type: 'POST',
             dataType: 'JSON',
-            data: JSON.stringify({ cus_id:$('#hd_cusID').val(),car:$('#ddl_car').val(),mileage:$('#txt_mileage').val(),products:arr,ddl_branch:$('#ddl_branch').val() }),
+            data: JSON.stringify({ cus_id:$('#hd_cusID').val(),carname:$('#ddl_car option:selected').text(),cusmobile:$('#cusmobile').val(),cusname:$('#cusname').val(),car:$('#ddl_car').val(),mileage:$('#txt_mileage').val(),products:arr,ddl_branch:$('#ddl_branch').val(),branchname:$('#ddl_branch option:selected').text() }),
             async: true,
             contentType: 'application/json; charset=utf-8',
             success: function (data) {
@@ -427,10 +427,10 @@ function searchsize(){
 
                 <div class="row">
                  <div class="col-md-6"> 
-                       <label class="control-label">ชื่อ-นามสกุล:<%=customer ? customer.customerInfo.name : ""%> <%=customer ? customer.customerInfo.lastname: ""%></label>
+                 <input id="cusname" type="hidden" value="<%=customer ? customer.customerInfo.name : ""%> <%=customer ? customer.customerInfo.lastname: ""%> ">      <label  class="control-label">ชื่อ-นามสกุล:<%=customer ? customer.customerInfo.name : ""%> <%=customer ? customer.customerInfo.lastname: ""%></label>
                  </div>
                  <div class="col-md-6"> 
-                       <label class="control-label">โทรศัพท์:<%=customer ? customer.customerInfo.mobile: ""%></label>
+                 <input id="cusmobile" type="hidden" value="<%=customer ? customer.customerInfo.mobile: ""%>">     <label  class="control-label">โทรศัพท์:<%=customer ? customer.customerInfo.mobile: ""%></label>
                  </div>
                  </br>
                  <input type="hidden" name="hd_cusID" id="hd_cusID" value="<%=customer ? customer._id:""%>"/>

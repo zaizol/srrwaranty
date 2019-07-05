@@ -19,6 +19,12 @@ router.post('/', isLoggedIn, function(req, res, next) {
     res.render('register.ejs', { title: 'ลงทะเบียนรับประกันสินค้า', user: req.user });
 });
 
+router.post('/checkcus', isLoggedIn, function(req, res, next) {
+    Customer.find({'customerInfo.name':req.body.name,'customerInfo.lastname':req.body.lastname}).exec(function(err, Customers) {
+        res.end(JSON.stringify(Customers));
+    });
+});
+
 router.post('/create', isLoggedIn, function(req, res, next) {
     var now = new Date();
     var NewCustomer = new Customer();
@@ -53,6 +59,7 @@ router.post('/create', isLoggedIn, function(req, res, next) {
         res.send({ redirect: '/customerlist' });
     });
 });
+
 
 module.exports = router;
 

@@ -47,38 +47,65 @@ $(document).ready(function () {
             alert('โปรดตรวจสอบข้อมูล '+str + 'ให้ครบถ้วน');
             return false;
         }
-        var arr=[];
-        $('#tbl_cars tbody tr').each(function(){
-            var carbrand='';
-            var carseries='';
-            var licenseNo='';
-            var mileage='';
-            var pcd='';
-            var offset='';
-            var wheelsize='';
-            carbrand=$(this).find('.carbrand')[0].innerHTML;
-            carseries=$(this).find('.carseries')[0].innerHTML;
-            licenseNo=$(this).find('.licenseNo')[0].innerHTML;
-            mileage=$(this).find('.mileage')[0].innerHTML;
-            caryear=$(this).find('.caryear')[0].innerHTML;
-            arr.push({'carbrand':carbrand,'carseries':carseries,'licenseNo':licenseNo,'mileage':mileage,'caryear':caryear});
-        });
 
-        $.ajax({
-            url:  '/register/create',
-            type: 'POST',
-            dataType: 'JSON',
-            data: JSON.stringify({ name:$('#name').val(),lastname:$('#lastname').val(),mobile:$('#mobile').val(),facebook:$('#facebook').val(),lineID:$('#lineID').val(),cars:arr }),
-            async: true,
-            contentType: 'application/json; charset=utf-8',
-            success: function (data) {
-                    window.location = data.redirect
-                }
-            }
-        );
+        Checkcus();
+       
     });
 });
 
+
+function  Checkcus(){
+    $.ajax({
+            url:  '/register/checkcus',
+            type: 'POST',
+            dataType: 'JSON',
+            data: JSON.stringify({ name:$('#name').val(),lastname:$('#lastname').val() }),
+            async: true,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                    console.log(data.length);
+                    if (data.length ==0)
+                    {
+                    var arr=[];
+                    $('#tbl_cars tbody tr').each(function(){
+                        var carbrand='';
+                        var carseries='';
+                        var licenseNo='';
+                        var mileage='';
+                        var pcd='';
+                        var offset='';
+                        var wheelsize='';
+                        carbrand=$(this).find('.carbrand')[0].innerHTML;
+                        carseries=$(this).find('.carseries')[0].innerHTML;
+                        licenseNo=$(this).find('.licenseNo')[0].innerHTML;
+                        mileage=$(this).find('.mileage')[0].innerHTML;
+                        caryear=$(this).find('.caryear')[0].innerHTML;
+                        arr.push({'carbrand':carbrand,'carseries':carseries,'licenseNo':licenseNo,'mileage':mileage,'caryear':caryear});
+                    });
+
+                    $.ajax({
+                        url:  '/register/create',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: JSON.stringify({ name:$('#name').val(),lastname:$('#lastname').val(),mobile:$('#mobile').val(),facebook:$('#facebook').val(),lineID:$('#lineID').val(),cars:arr }),
+                        async: true,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                                window.location = data.redirect
+                            }
+                        }
+                    );
+
+                    }else{
+                        alert('ชื่อ - นามสกุล นี้มีอยู่แล้ว กรุณาลองใหม่อีกครั้ง');
+
+                    }
+                    
+                }
+            }
+        );
+
+}
 
 </script>
 <style>

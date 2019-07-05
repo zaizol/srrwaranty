@@ -38,7 +38,7 @@ var reportwaranty = require('./routes/reportwaranty');
 var reportwaranty_type = require('./routes/reportwaranty_type');
 var reportwaranty_brand = require('./routes/reportwaranty_brand');
 var reportclaim = require('./routes/reportclaim');
-
+var reportwarrantynew = require('./routes/reportwarrantynew');
 
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
@@ -118,7 +118,7 @@ app.use('/reportwaranty_type', reportwaranty_type);
 app.use('/reportwaranty_brand', reportwaranty_brand);
 app.use('/reportclaim', reportclaim);
 
-
+app.use('/reportwarrantynew', reportwarrantynew);
 
 
 // catch 404 and forward to error handler

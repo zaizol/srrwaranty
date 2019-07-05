@@ -1,0 +1,193 @@
+<% include partials/head %> 
+<script>
+
+$(document).ready(function () {
+ var follow_date = new Date();
+ 			
+ $(function () {
+		$('.input-group.date').datetimepicker({
+			defaultDate:follow_date,
+      format: 'DD/MM/YYYY',
+		});
+            });
+//SET First Date to query
+var firstDay = moment().startOf('month').format('DD/MM/YYYY');
+$('#txt_from').val(firstDay);
+$('#txt_to').val(moment().format('DD/MM/YYYY'));
+            getdata();
+            $('#btn_search').click(function(){   
+                 getdata();   
+            });
+
+            $('#btn_export').click(function(){
+       
+
+       //getting values of current time for generating the file name
+       var dt = new Date();
+       var day = dt.getDate();
+       var month = dt.getMonth() + 1;
+       var year = dt.getFullYear();
+       var hour = dt.getHours();
+       var mins = dt.getMinutes();
+       var postfix = day + "." + month + "." + year + "_" + hour + "." + mins;
+       //creating a temporary HTML link element (they support setting file names)
+       var a = document.createElement('a');
+       //getting data from our div that contains the HTML table
+       //var data_type = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+       var data_type = 'data:application/vnd.ms-excel';
+       var table_div = document.getElementById('tableWrap');
+       var table_html = table_div.outerHTML.replace(/ /g, '%20');
+       a.href = data_type + ', ' + table_html;
+       //setting the file name
+       a.download = 'report_' + postfix + '.xls';
+       //triggering the function
+       a.click();
+       //just in case, prevent default behaviour
+       //e.preventDefault();
+   })
+
+});
+
+function getdata(){
+$.ajax({
+    url: '/reportwarrantynew/load',
+    async:true,
+    data:{txt_from: $('#txt_from').val(),txt_to: $('#txt_to').val()},
+    error: function() {
+      $('#info').html('<p>An error has occurred</p>');
+    },
+    success: function(data) {
+        
+        if (data != null)
+        {
+            bindtbl(data);
+        }else{
+            alert('ไม่พบข้อมูล');
+        }
+      
+    },
+    type: 'GET'
+    });
+
+}
+
+function bindtbl(data){
+var idata=JSON.parse(data);
+var tbl=$('#tbl_report tbody');
+tbl.empty();
+console.log(idata);
+if (idata.length==0){
+ tbl.append("<tr>\
+                                <td colspan='3'>ไม่พบข้อมูล</td>\
+                                 </tr>");
+
+}else{
+    var view="";
+    for (var i = 0; i < idata.length; i++) {
+        view="View('"+idata[i].id+"')";
+        tbl.append("<tr>\
+                                 <td>"+idata[i].customername+"</td>\
+                                 <td>"+idata[i].customercontact+"</td>\
+                                 <td>"+idata[i].customercar+"</td>\
+                                 <td>"+moment(idata[i].createdAt).format('DD/MM/YYYY hh:mm')+"</td>\
+                                 <td>"+idata[i].branchname+"</td>\
+                                 <td>"+idata[i].salename+"</td>\
+                                 <td>"+idata[i].productname+ ' จำนวน'+idata[i].qty+"</td>\
+                                 <td>"+ ' วันที่'+ moment(idata[i].sow).format('DD/MM/YYYY') +' ถึง '+ moment(idata[i].eow).format('DD/MM/YYYY')+ " "+idata[i].warantyconditionsselect +"</td>\
+                                 </tr>");  
+    }
+}
+}
+
+
+</script>
+
+<style>
+
+</style>
+
+
+</head>
+<body>
+
+<div id="wrapper">
+<% include partials/nav %>  
+       
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+		                    <h1 class="page-header">รายงานลงทะเบียนรับประกัน
+                        </h1>
+                    </div>
+                </div>
+                  <div class="row">
+                    <div class="col-lg-5">
+		                    จากวันที่
+                    </div>
+                    <div class="col-lg-5">
+		                    ถึงวันที่
+                    </div>
+                     <div class="col-lg-2">
+		                    
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-5">
+		                   <div class="input-group date">
+				            <input type="text" class="form-control" name="txt_from" id="txt_from" required="required"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+				            </div>
+                    </div>
+                     <div class="col-lg-5">
+		                   <div class="input-group date">
+				            <input type="text" class="form-control" name="txt_to" id="txt_to" required="required"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+				            </div>
+                    </div>
+                     <div class="col-lg-2">
+		                   <div class="input-group">
+				            <input type="button" id="btn_search" class="btn btn-info" value="ค้นหา">
+				            </div>
+                    </div>
+                </div>
+
+
+
+                 <div class="row">
+                        <div id="tableWrap">
+                    <div class="col-lg-12">
+                        <table id="tbl_report" class="table">
+                        <thead>
+                        <tr>
+                        <td>ชื่อสกุล </td>
+                        <td>เบอร์โทร </td>
+                        <td>ทะเบียนรถ </td>
+                        <td>วันที่ที่ลงทะเบียนรับประกัน </td>
+                        <td> สาขาที่ลงทะเบียน  </td>
+                        <td> ชื่อพนักงานที่ลงทะเบียน</td>
+                        <td> รายละเอียดรายการสินค้า  </td>
+                        <td>วันที่หมดอายุของการรับประกันสินค้า </td>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <button id="btn_export">download</button>
+                
+               
+            </div>
+        </div>
+
+        
+        <!-- /#page-wrapper -->
+
+</div>
+    <!-- /#wrapper -->
+<% include partials/script %>  
+  </body>
+</html>  

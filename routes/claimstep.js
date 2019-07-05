@@ -86,6 +86,7 @@ router.get('/getdataforpopup/:id', function(req, res, next) {
             claim_Appointmentremark: claims.claim_Appointmentremark,
 
             claimstatus: claims.claimstatus,
+            reasonclaim:claims.reasonclaim,
         });
         res.end(JSON.stringify(reports));
     });

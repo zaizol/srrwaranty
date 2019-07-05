@@ -62,6 +62,9 @@ router.post('/warantyproduct', isLoggedIn, function(req, res, next) {
     newJob.carID = req.body.car;
     newJob.branchID = req.body.ddl_branch;
     newJob.mileage = req.body.mileage;
+    newJob.branchname = req.body.branchname;
+    newJob.salename =req.user.local.name+ ' ' +req.user.local.surname;
+
     newJob.save(function(err) {
         if (err)
             throw err;
@@ -92,6 +95,14 @@ router.post('/warantyproduct', isLoggedIn, function(req, res, next) {
             newJoblist.yearweek = producte.yearweek;
             newJoblist.warantyconditions = producte.warantyconditions;
             newJoblist.warantyconditionsselect = producte.warantyconditionsselect;
+
+            newJoblist.customername = req.body.cusname;
+            newJoblist.customercontact = req.body.cusmobile;
+            newJoblist.customercar = req.body.carname;
+            newJoblist.branchname = req.body.branchname;
+            newJoblist.salename =req.user.local.name+ ' ' +req.user.local.surname;
+            
+
             newJoblist.save(function(err) {
                 if (err)
                     throw err;
