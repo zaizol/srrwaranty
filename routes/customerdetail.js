@@ -49,7 +49,7 @@ router.get('/loadservicehis/:id', isLoggedIn, function(req, res, next) {
                         for (var j in Joblists) {
                             Joblistj = Joblists[j];
                             if (Joblistj.jobID.equals(job._id)) {
-                                reports.push({ servicedate: job.createdAt, branch: job.branchID.BranchInfo.name, cardetail: job.carID.carInfo.brand + '/' + job.carID.carInfo.series, licenseNo: job.carID.carInfo.licenseNo, mileage: job.mileage, product: Joblistj.productID.name, qty: Joblistj.qty, eow: Joblistj.eow, warantyconditions: Joblistj.warantyconditions, JoblistjID: Joblistj._id,yearweek: Joblistj.yearweek });
+                                reports.push({ servicedate: job.createdAt, branch: job.branchID.BranchInfo.name, cardetail: job.carID.carInfo.brand + '/' + job.carID.carInfo.series, licenseNo: job.carID.carInfo.licenseNo, mileage: job.mileage, product: Joblistj.productID.name, qty: Joblistj.qty, eow: Joblistj.eow, warantyconditions: Joblistj.warantyconditions,warantyconditionsselect:Joblistj.warantyconditionsselect, JoblistjID: Joblistj._id,yearweek: Joblistj.yearweek });
                             }
                         }
                     }
