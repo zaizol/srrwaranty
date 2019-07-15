@@ -17,11 +17,28 @@ router.get('/', function(req, res, next) {
 router.post('/getcustomer', function(req, res, next) {
     var reports = [];
     Car.find({ 'carInfo.licenseNo': req.body.searchtext }).populate('customerID').exec(function(err, carcustomers) {
-        for (var i in carcustomers) {
+        Customer.find({'customerInfo.mobile': { $regex: req.query.searchmobile, $options: 'i' } }).where('_id').in(carcustomers).exec(function(err, customers) {
+            customers.forEach(function(x) { if (!listcustomers.includes(x._id)) listcustomers.push(x._id); });
+            Car.find({}).where('customerID').in(listcustomers).exec(function(err, cars) {
+                for (var i in customers) {
+                    customer = customers[i];
+                    var licenNO = "";
+                    for (var t in cars) {
+                        car = cars[t];
+                        if (car.customerID.equals(customer._id)) {
+                            licenNO = licenNO + car.carInfo.licenseNo + ",";
+                        }
+                    }
+                    reports.push({ id: customer._id, fullname: customer.customerInfo.name + " " + customer.customerInfo.lastname, mobile: customer.customerInfo.mobile, licenseNo: licenNO, lastservice: customer.LastServicedate });
+                }
+                res.end(JSON.stringify(reports));
+            });
+        });
+        /*for (var i in carcustomers) {
             customer = carcustomers[i];
             reports.push({ id: customer.customerID._id, fullname: customer.customerID.customerInfo.name + " " + customer.customerID.customerInfo.lastname, mobile: customer.customerID.customerInfo.mobile });
         }
-        res.end(JSON.stringify(reports));
+        res.end(JSON.stringify(reports));*/
     });
 });
 
