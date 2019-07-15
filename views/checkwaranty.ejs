@@ -21,7 +21,7 @@ function getcustomer()
             url:  '../checkwaranty/getcustomer',
             type: 'POST',
             dataType: 'JSON',
-            data: JSON.stringify({ searchtext:$("#txt_search").val() }),
+            data: JSON.stringify({ search:$('#txt_search').val(),searchmobile:$('#txt_searchmobile').val() }),
             async: true,
             contentType: 'application/json; charset=utf-8',
             success: function (data) {
