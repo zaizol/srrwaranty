@@ -14,6 +14,12 @@ var moment = require('moment');
 
 router.get('/', isLoggedIn, function(req, res) {
     Branch.find().exec(function(err, Branchs) {
+
+        //Product.update({},{$set: { warantyyear: 1 }},{multi: true} , function(err){
+
+//console.log('update');
+        //})
+
     res.render('reportclaim.ejs', { user: req.user,moment:moment,branchs:Branchs });
 });
 });
@@ -29,26 +35,26 @@ router.get('/load', isLoggedIn, function(req, res) {
     console.log(req.query.branch);
         if (req.query.branch!= '')
         {
-            Claim.find({'createdAt':{claimbranch:req.query.branch, $gte: next_date,$lte:  moment(tonext_date).endOf('day')}}).exec(function(err, claims) {
+            Claim.find({'createdAt':{claimbranch:req.query.branch, $gte: next_date,$lte:  moment(tonext_date).endOf('day')}}).populate('joblistID').populate('productID').exec(function(err, claims) {
                 var reports = [];
                  
                  console.log(claims);
                  for(var i in claims){
                     nclaim = claims[i];
-                     reports.push({ claimbranch: nclaim.claimbranch,claimstatus:nclaim.claimstatus,claimbyname:nclaim.claimbyname,reasonclaim:nclaim.reasonclaim,claimdate:nclaim.claimdate,customer_contactname:nclaim.customer_contactname,customer_contactmobile:nclaim.customer_contactmobile,qty:nclaim.qty });    
+                     reports.push({ claimbranch: nclaim.claimbranch,claimstatus:nclaim.claimstatus,claimbyname:nclaim.claimbyname,reasonclaim:nclaim.reasonclaim,claimdate:nclaim.claimdate,customer_contactname:nclaim.customer_contactname,customer_contactmobile:nclaim.customer_contactmobile,qty:nclaim.qty,cuscar:nclaim.joblistID.customercar,registerJob:nclaim.joblistID.createdAt,product:nclaim.productID.name });    
                  }
                 res.end(JSON.stringify(reports));
             });
 
         }else{
 
-            Claim.find({'createdAt':{ $gte: next_date,$lte:  moment(tonext_date).endOf('day')}}).exec(function(err, claims) {
+            Claim.find({'createdAt':{ $gte: next_date,$lte:  moment(tonext_date).endOf('day')}}).populate('joblistID').populate('productID').exec(function(err, claims) {
                 var reports = [];
                  
                  console.log(claims);
                  for(var i in claims){
                     nclaim = claims[i];
-                     reports.push({ claimbranch: nclaim.claimbranch,claimstatus:nclaim.claimstatus,claimbyname:nclaim.claimbyname,reasonclaim:nclaim.reasonclaim,claimdate:nclaim.claimdate,customer_contactname:nclaim.customer_contactname,customer_contactmobile:nclaim.customer_contactmobile,qty:nclaim.qty });    
+                     reports.push({ claimbranch: nclaim.claimbranch,claimstatus:nclaim.claimstatus,claimbyname:nclaim.claimbyname,reasonclaim:nclaim.reasonclaim,claimdate:nclaim.claimdate,customer_contactname:nclaim.customer_contactname,customer_contactmobile:nclaim.customer_contactmobile,qty:nclaim.qty,cuscar:nclaim.joblistID.customercar,registerJob:nclaim.joblistID.createdAt,product:nclaim.productID.name });    
                  }
                 res.end(JSON.stringify(reports));
             });

@@ -33,9 +33,16 @@ router.post('/getcustomer', function(req, res, next) {
         });
         }else{
             Car.find({ 'carInfo.licenseNo': req.body.search }).populate('customerID').exec(function(err, carcustomers) {
+                console.log(carcustomers);
                 for (var i in carcustomers) {
                     customer = carcustomers[i];
-                    reports.push({ id: customer.customerID._id, fullname: customer.customerID.customerInfo.name + " " + customer.customerID.customerInfo.lastname, mobile: customer.customerID.customerInfo.mobile });
+                    var id = "";
+                    if (customer.customerID != null)
+                    {
+                        id=customer.customerID._id;
+                    }
+
+                    reports.push({ id: id, fullname: customer.customerID.customerInfo.name + " " + customer.customerID.customerInfo.lastname, mobile: customer.customerID.customerInfo.mobile });
                 }
                 res.end(JSON.stringify(reports));
             });

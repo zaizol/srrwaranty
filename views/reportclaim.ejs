@@ -110,6 +110,11 @@ if (idata.length==0){
             {
                 cus=' '+cus+idata[i].customer_contactmobile+' ';
             }
+            if(idata[i].cuscar != '')
+            {
+                cus=' '+cus+idata[i].cuscar+' ';
+            }
+
             if(idata[i].qty != '')
             {
                 pro=' '+pro+idata[i].qty+' ';
@@ -164,9 +169,10 @@ if (idata.length==0){
         tbl.append("<tr>\
                                  <td>"+cus+"</td>\
                                  <td>"+moment(idata[i].claimdate).format("DD/MM/YYYY")+"</td>\
+                                 <td>"+moment(idata[i].registerJob).format("DD/MM/YYYY")+"</td>\
                                  <td>"+idata[i].claimbranch+"</td>\
                                  <td>"+idata[i].claimbyname+"</td>\
-                                 <td>"+pro+"</td>\
+                                 <td>"+idata[i].product+" จำนวน" +pro+"ชิ้น</td>\
                                  <td>"+idata[i].reasonclaim+"</td>\
                                  <td>"+status+"</td>\
                                  </tr>");  
@@ -263,11 +269,12 @@ if (idata.length==0){
                         <table id="tbl_report" class="table">
                         <thead>
                         <tr>
-                        <td>ชื่อ-สกุล เบอร์โทร</td>
+                        <td>ชื่อ-สกุล เบอร์โทร ทะเบียนรถ</td>
                         <td>วันที่เคลม</td>
+                        <td>วันที่ลงทะเบียนรับประกันสินค้า</td>
                         <td>สาขาที่เคลม</td>
                         <td>พนักงานรับเคลม</td>
-                        <td>รายละเอียดการเคลม</td>
+                        <td>รายละเอียดสินค้า จำนวน สาเหตุการเคลม</td>
                         <td>หมายเหตุ</td>
                         <td>สถานะล่าสุด</td>
                         </tr>
