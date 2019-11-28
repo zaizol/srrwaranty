@@ -76,7 +76,7 @@ router.post('/getcustomerByID', function(req, res, next) {
     {
        
             Customer.findById(req.body.id).exec(function(err, customers) {
-            reports.push({ id: customers._id, fullname: customers.customerInfo.name + " " + customer.customerInfo.lastname, mobile: customer.customerInfo.mobile });
+            reports.push({ id: customers._id, fullname: customers.customerInfo.name + " " + customers.customerInfo.lastname, mobile: customers.customerInfo.mobile });
                 res.setHeader("Content-Type", "application/json; charset=utf-8");
                 res.end(JSON.stringify(reports));
         });
