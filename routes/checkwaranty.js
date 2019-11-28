@@ -72,11 +72,10 @@ router.post('/getcustomer', function(req, res, next) {
 
 router.post('/getcustomerByID', function(req, res, next) {
     var reports = [];
-    var listcustomers = [];
     if (req.body.id != '')
     {
        
-            Customer.findById(req.body.i).exec(function(err, customers) {
+            Customer.findById(req.body.id).exec(function(err, customers) {
             reports.push({ id: customers._id, fullname: customers.customerInfo.name + " " + customer.customerInfo.lastname, mobile: customer.customerInfo.mobile });
                 res.setHeader("Content-Type", "application/json; charset=utf-8");
                 res.end(JSON.stringify(reports));
