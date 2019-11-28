@@ -71,23 +71,24 @@ router.post('/getcustomer', function(req, res, next) {
 
 
 router.post('/getcustomerByID', function(req, res, next) {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
     var reports = [];
     if (req.body.id != '')
     {
        
             Customer.findById(req.body.id).exec(function(err, customers) {
             reports.push({ id: customers._id, fullname: customers.customerInfo.name + " " + customers.customerInfo.lastname, mobile: customers.customerInfo.mobile });
-                res.setHeader("Content-Type", "application/json; charset=utf-8");
                 res.end(JSON.stringify(reports));
         });
     }else{
-        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        
         res.end(JSON.stringify(reports));
     }
     
 });
 
 router.post('/getcar', function(req, res, next) {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
     var reports = [];
     var listjobs = [];
     var claimfound = [];
@@ -131,7 +132,7 @@ router.post('/getcar', function(req, res, next) {
                                 }
                             }
                         }
-                        res.setHeader("Content-Type", "application/json; charset=utf-8");
+                        
                         res.end(JSON.stringify(reports));
                     }
                 });
