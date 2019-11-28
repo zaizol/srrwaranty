@@ -201,21 +201,22 @@ router.get('/auth/facebook/callback',
 
 
 router.get('/index', isLoggedIn, function(req, res, next) {
-    /*var arr = [];
-    arr.push({ 'name': 'สำนักงานใหญ่', 'open': '08.00', 'close': '18.00', 'state': '', orders: 1 });
+    //var arr = [];
+   // arr.push({ 'name': 'พระราม2', 'open': '08.00', 'close': '18.00', 'state': '', orders: 9 });
+    /*arr.push({ 'name': 'สำนักงานใหญ่', 'open': '08.00', 'close': '18.00', 'state': '', orders: 1 });
     arr.push({ 'name': 'สุขสวัสดิ์', 'open': '08.00', 'close': '18.00', 'state': '', orders: 2 });
     arr.push({ 'name': 'ศรีนครินทร์', 'open': '08.00', 'close': '18.00', 'state': '', orders: 3 });
     arr.push({ 'name': 'หนามแดง', 'open': '08.00', 'close': '18.00', 'state': '', orders: 4 });
     arr.push({ 'name': 'ซอยมังกร', 'open': '08.00', 'close': '18.00', 'state': '', orders: 5 });
     arr.push({ 'name': 'ชลบุรี', 'open': '08.00', 'close': '18.00', 'state': '', orders: 6 });
     arr.push({ 'name': 'ชลบุรีบายพาส', 'open': '08.00', 'close': '18.00', 'state': '', orders: 7 });
-    arr.push({ 'name': 'โกดัง', 'open': '08.00', 'close': '18.00', 'state': '', orders: 8 });
+    arr.push({ 'name': 'โกดัง', 'open': '08.00', 'close': '18.00', 'state': '', orders: 8 });*/
 
-    Branch.remove(function(err, removed) {
+    /*Branch.remove(function(err, removed) {
 
         // where removed is the count of removed documents
-    });
-    arr.forEach(function(branchs) {
+    });*/
+    /*arr.forEach(function(branchs) {
         var newBranch = new Branch()
         newBranch.BranchInfo.name = branchs.name;
         newBranch.BranchInfo.open = branchs.open;
