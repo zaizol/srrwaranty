@@ -68,6 +68,26 @@ router.post('/getcustomer', function(req, res, next) {
    
 });
 
+
+
+router.post('/getcustomerByID', function(req, res, next) {
+    var reports = [];
+    var listcustomers = [];
+    if (req.body.id != '')
+    {
+       
+            Customer.findById(req.body.i).exec(function(err, customers) {
+            reports.push({ id: customers._id, fullname: customers.customerInfo.name + " " + customer.customerInfo.lastname, mobile: customer.customerInfo.mobile });
+                res.setHeader("Content-Type", "application/json; charset=utf-8");
+                res.end(JSON.stringify(reports));
+        });
+    }else{
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        res.end(JSON.stringify(reports));
+    }
+    
+});
+
 router.post('/getcar', function(req, res, next) {
     var reports = [];
     var listjobs = [];
