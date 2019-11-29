@@ -16,7 +16,9 @@ router.get('/:id', function(req, res, next) {
 });
 
 router.get('/getdataforpopup/:id', function(req, res, next) {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
     Claim.findById(req.params.id).populate('productID').exec(function(err, claims) {
+        
         var reports = [];
         reports.push({
             id: claims._id,
@@ -34,7 +36,7 @@ router.get('/getdataforpopup/:id', function(req, res, next) {
             claimqty: claims.qty,
             claimbyname: claims.claimbyname,
             claimdate: claims.claimdate,
-            claimremark: claims.claimremark,
+            claimremark: claims.claimremark != null ? claims.claimremark : "",
             claimbranch:claims.claimbranch,
             warehouse_receiveqty: claims.warehouse_receiveqty,
             warehouse_receivebyname: claims.warehouse_receivebyname,
