@@ -14,10 +14,10 @@ router.get('/loaddata', isLoggedIn, function(req, res, next) {
     var listcustomers = [];
     if (req.query.search != "") {
         if (req.query.searchmobile != "") {
-            Car.find({ "carInfo.licenseNo": { $regex: req.query.search, $options: 'i' } }).lean().distinct('customerID').exec(function(err, carcustomers) {
-                Customer.find({'customerInfo.mobile': { $regex: req.query.searchmobile, $options: 'i' } }).where('_id').in(carcustomers).exec(function(err, customers) {
+            Car.find({ "carInfo.licenseNo": { $regex: req.query.search, $options: 'i' } }).lean().distinct('customerID').limit(50).exec(function(err, carcustomers) {
+                Customer.find({'customerInfo.mobile': { $regex: req.query.searchmobile, $options: 'i' } }).where('_id').in(carcustomers).limit(50).exec(function(err, customers) {
                     customers.forEach(function(x) { if (!listcustomers.includes(x._id)) listcustomers.push(x._id); });
-                    Car.find({}).where('customerID').in(listcustomers).exec(function(err, cars) {
+                    Car.find({}).where('customerID').in(listcustomers).limit(50).exec(function(err, cars) {
                         for (var i in customers) {
                             customer = customers[i];
                             var licenNO = "";
@@ -34,10 +34,10 @@ router.get('/loaddata', isLoggedIn, function(req, res, next) {
                 });
             });
         }else{
-            Car.find({ "carInfo.licenseNo": { $regex: req.query.search, $options: 'i' } }).lean().distinct('customerID').exec(function(err, carcustomers) {
-                Customer.find().where('_id').in(carcustomers).exec(function(err, customers) {
+            Car.find({ "carInfo.licenseNo": { $regex: req.query.search, $options: 'i' } }).lean().distinct('customerID').limit(50).exec(function(err, carcustomers) {
+                Customer.find().where('_id').in(carcustomers).limit(50).exec(function(err, customers) {
                     customers.forEach(function(x) { if (!listcustomers.includes(x._id)) listcustomers.push(x._id); });
-                    Car.find({}).where('customerID').in(listcustomers).exec(function(err, cars) {
+                    Car.find({}).where('customerID').in(listcustomers).limit(50).exec(function(err, cars) {
                         for (var i in customers) {
                             customer = customers[i];
                             var licenNO = "";
@@ -58,9 +58,9 @@ router.get('/loaddata', isLoggedIn, function(req, res, next) {
         
     } else {
         if (req.query.searchmobile != "") {
-            Customer.find({'customerInfo.mobile': { $regex: req.query.searchmobile, $options: 'i' } }).exec(function(err, customers) {
+            Customer.find({'customerInfo.mobile': { $regex: req.query.searchmobile, $options: 'i' } }).limit(50).exec(function(err, customers) {
                 customers.forEach(function(x) { if (!listcustomers.includes(x._id)) listcustomers.push(x._id); });
-                Car.find({}).where('customerID').in(listcustomers).exec(function(err, cars) {
+                Car.find({}).where('customerID').in(listcustomers).limit(50).exec(function(err, cars) {
                     for (var i in customers) {
                         customer = customers[i];
                         var licenNO = "";
@@ -76,9 +76,9 @@ router.get('/loaddata', isLoggedIn, function(req, res, next) {
                 });
             });
         }else{
-            Customer.find().exec(function(err, customers) {
+            Customer.find().limit(50).exec(function(err, customers) {
                 customers.forEach(function(x) { if (!listcustomers.includes(x._id)) listcustomers.push(x._id); });
-                Car.find({}).where('customerID').in(listcustomers).exec(function(err, cars) {
+                Car.find({}).limit(50).where('customerID').in(listcustomers).exec(function(err, cars) {
                     for (var i in customers) {
                         customer = customers[i];
                         var licenNO = "";

@@ -19,7 +19,7 @@ router.get('/loaddata', isLoggedIn, function(req, res, next) {
     if (req.query.search != "") {
         //Claim.find({ "claimby": req.user._id,
         Product.find({}).exec(function(err, Products) {
-        Claim.find({ $or: [{ "customer_contactname": { $regex: req.query.search, $options: 'i' } }, { "customer_contactmobile": { $regex: req.query.search, $options: 'i' } }] }).populate('productID').exec(function(err, Claims) {
+        Claim.find({ $or: [{ "customer_contactname": { $regex: req.query.search, $options: 'i' } }, { "customer_contactmobile": { $regex: req.query.search, $options: 'i' } }] }).populate('productID').limit(100).exec(function(err, Claims) {
             for (var i in Claims) {
                 claim = Claims[i];
                 var claimstatusname = "";
@@ -83,7 +83,7 @@ router.get('/loaddata', isLoggedIn, function(req, res, next) {
     });
     } else {
         Product.find({}).exec(function(err, Products) {
-        Claim.find({}).exec(function(err, Claims) {
+        Claim.find({}).limit(100).exec(function(err, Claims) {
             for (var i in Claims) {
                 claim = Claims[i];
                 var claimstatusname = "";
