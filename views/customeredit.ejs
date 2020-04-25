@@ -175,18 +175,18 @@ function  Checkcus(){
                         }
                     });
 
-                   // $.ajax({
-                   //     url:  '/customeredit/update',
-                   //     type: 'POST',
-                   //     dataType: 'JSON',
-                   //     data: JSON.stringify({ name:$('#name').val(),lastname:$('#lastname').val(),mobile:$('#mobile').val(),facebook:$('#facebook').val(),lineID:$('#lineID').val(),cars:arr,customerID:$('#hd_id').val() }),
-                   //     async: true,
-                  //      contentType: 'application/json; charset=utf-8',
-                   //     success: function (data) {
-                   //             window.location = data.redirect
-                   //         }
-                   //     }
-                   // );
+                    $.ajax({
+                        url:  '/customeredit/update',
+                        type: 'POST',
+                        dataType: 'JSON',
+                        data: JSON.stringify({ name:$('#name').val(),lastname:$('#lastname').val(),mobile:$('#mobile').val(),facebook:$('#facebook').val(),lineID:$('#lineID').val(),cars:arr,customerID:$('#hd_id').val() }),
+                        async: true,
+                        contentType: 'application/json; charset=utf-8',
+                       success: function (data) {
+                                window.location = data.redirect
+                            }
+                        }
+                    );
                     }else{
                         alert('ชื่อ - นามสกุล นี้มีอยู่แล้ว กรุณาลองใหม่อีกครั้ง');
                     }
