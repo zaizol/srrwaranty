@@ -19,6 +19,7 @@ router.get('/', isLoggedIn, function(req, res, next) {
 router.get('/:id', isLoggedIn, function(req, res, next) {
     Carbrand.find().exec(function(err, brands) {
         Customer.findById(req.params.id).exec(function(err, customers) {
+            console.log(customers);
             res.render('customerdetail.ejs', { title: 's', user: req.user, customer: customers, cars: null, brands: brands });
         });
     });
